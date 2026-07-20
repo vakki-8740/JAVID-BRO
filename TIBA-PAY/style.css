@@ -1,0 +1,461 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    min-height: 100vh;
+    padding: 10px 20px;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 380px;
+    padding: 5px 20px;
+}
+
+.logo-section {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.logo-img {
+    width: 200px;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+    mix-blend-mode: multiply;
+}
+
+.input-group {
+    margin-bottom: 20px;
+}
+
+.input-wrapper {
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid #e0e0e0;
+    padding: 10px 5px;
+    transition: border-bottom-color 0.3s ease;
+}
+
+.input-wrapper:focus-within {
+    border-bottom-color: #2196f3;
+}
+
+.input-icon {
+    width: 22px;
+    height: 22px;
+    margin-right: 12px;
+    flex-shrink: 0;
+}
+
+.input-wrapper input {
+    border: none;
+    outline: none;
+    font-size: 16px;
+    width: 100%;
+    color: #333;
+    background: transparent;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.input-wrapper input::placeholder {
+    color: #bbb;
+}
+
+.error-msg {
+    color: #e53935;
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+}
+
+.error-msg.show {
+    display: block;
+}
+
+.input-wrapper.error {
+    border-bottom-color: #e53935;
+}
+
+.options-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 0 2px;
+}
+
+.save-password {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 15px;
+    color: #2196f3;
+    user-select: none;
+}
+
+.save-password input {
+    display: none;
+}
+
+.custom-radio {
+    width: 18px;
+    height: 18px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+    position: relative;
+    transition: all 0.2s ease;
+}
+
+.save-password input:checked + .custom-radio {
+    border-color: #2196f3;
+    background: #2196f3;
+}
+
+.save-password input:checked + .custom-radio::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 7px;
+    height: 7px;
+    background: white;
+    border-radius: 50%;
+}
+
+.forgot-link {
+    color: #2196f3;
+    text-decoration: none;
+    font-size: 15px;
+    transition: opacity 0.2s;
+}
+
+.forgot-link:hover {
+    opacity: 0.8;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.login-btn:hover {
+    background: #1976d2;
+}
+
+.login-btn:active {
+    transform: scale(0.98);
+}
+
+.loading-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+}
+
+.loading-popup.show {
+    display: flex;
+}
+
+.loading-box {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 50px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+    animation: fadeIn 0.3s ease-out;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #e0e0e0;
+    border-top-color: #2196f3;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 15px;
+}
+
+.loading-box p {
+    font-size: 16px;
+    color: #555;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 999;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.overlay.show {
+    display: flex;
+    opacity: 1;
+}
+
+.otp-popup {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 32px 32px;
+    max-width: 360px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+    transform: scale(0.9);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.overlay.show .otp-popup {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.otp-close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: #999;
+    cursor: pointer;
+    line-height: 1;
+    padding: 4px;
+    transition: color 0.2s;
+}
+
+.otp-close:hover {
+    color: #333;
+}
+
+.otp-popup h2 {
+    font-size: 22px;
+    color: #1a1a1a;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.otp-popup .otp-sub {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 32px;
+}
+
+.otp-inputs {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.otp-input {
+    width: 48px;
+    height: 48px;
+    text-align: center;
+    font-size: 24px;
+    font-weight: 500;
+    border: none;
+    border-bottom: 2px solid #d0d0d0;
+    border-radius: 0;
+    outline: none;
+    color: #1a1a1a;
+    caret-color: transparent;
+    background: transparent;
+    transition: border-color 0.2s;
+}
+
+.otp-input:focus {
+    border-bottom-color: #2196f3;
+}
+
+.otp-input.filled {
+    border-bottom-color: #2196f3;
+}
+
+.verify-btn {
+    width: 100%;
+    padding: 14px;
+    background: #2196f3;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.3s;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.verify-btn:hover {
+    background: #1976d2;
+}
+
+.resend-text {
+    font-size: 13px;
+    color: #999;
+    margin-top: 18px;
+}
+
+.resend-text a {
+    color: #2196f3;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.resend-text a.disabled {
+    color: #bbb;
+    pointer-events: none;
+    text-decoration: none;
+}
+
+.success-popup {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+.success-popup.show {
+    display: flex;
+}
+
+.success-box {
+    background: white;
+    border-radius: 20px;
+    padding: 40px 30px;
+    max-width: 380px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+    animation: popIn 0.4s ease-out;
+}
+
+.success-box .check-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    background: #4ade80;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-box .check-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.success-box h2 {
+    font-size: 22px;
+    color: #4ade80;
+    margin-bottom: 10px;
+}
+
+.success-box p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 4px;
+}
+
+.success-box .timer-text {
+    font-size: 13px;
+    color: #999;
+    margin-top: 15px;
+}
+
+@keyframes popIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.agreement {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 15px;
+    font-size: 14px;
+    color: #666;
+}
+
+.agreement-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.agreement-checkbox input {
+    display: none;
+}
+
+.custom-check {
+    width: 18px;
+    height: 18px;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+.agreement a {
+    color: #2196f3;
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
