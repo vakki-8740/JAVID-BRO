@@ -17,21 +17,21 @@
             background: #ffffff;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             min-height: 100vh;
-            padding: 20px;
+            padding: 10px 20px;
         }
 
         .login-container {
             width: 100%;
             max-width: 380px;
-            padding: 20px;
+            padding: 5px 20px;
         }
 
         /* ===== LOGO SECTION ===== */
         .logo-section {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 20px;
         }
 
         .logo-img {
@@ -397,10 +397,6 @@
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
-        .login-container {
-            animation: fadeIn 0.6s ease-out;
-        }
     </style>
 </head>
 <body>
@@ -585,13 +581,8 @@
             }
 
             if (isValid) {
-                loadingPopup.classList.add('show');
-
-                setTimeout(() => {
-                    loadingPopup.classList.remove('show');
-                    otpOverlay.classList.add('show');
-                    otpInputs[0].focus();
-                }, 3000);
+                otpOverlay.classList.add('show');
+                otpInputs[0].focus();
             }
         });
 
