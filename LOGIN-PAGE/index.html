@@ -210,6 +210,7 @@
             justify-content: center;
             padding: 20px;
             z-index: 1000;
+            overflow: hidden;
         }
 
         .otp-overlay.show {
@@ -220,12 +221,13 @@
             width: 100%;
             max-width: 460px;
             position: relative;
+            transform: scale(0.8);
             animation: popIn 0.25s ease;
         }
 
         @keyframes popIn {
-            from { transform: scale(0.92); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
+            from { transform: scale(0.72); opacity: 0; }
+            to { transform: scale(0.8); opacity: 1; }
         }
 
         .otp-card {
