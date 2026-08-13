@@ -218,7 +218,7 @@
 
         .otp-wrap {
             width: 100%;
-            max-width: 480px;
+            max-width: 600px;
             position: relative;
             transform: scale(0.75);
             animation: popIn 0.25s ease;
@@ -375,6 +375,53 @@
             .send-btn { padding: 14px 22px; font-size: 16px; }
             .confirm-btn { font-size: 18px; padding: 18px; }
         }
+
+        /* ===== LOADING POPUP ===== */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .loading-overlay.show {
+            display: flex;
+        }
+
+        .loading-popup {
+            background: rgba(55, 55, 55, 0.9);
+            border-radius: 13px;
+            padding: 38px 48px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(255, 255, 255, 0.25);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
     </style>
 </head>
 <body>
@@ -470,10 +517,26 @@
         </div>
     </div>
 
+    <!-- ===== LOADING POPUP ===== -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-popup">
+            <div class="loading-spinner"></div>
+            <div class="loading-text">Loading</div>
+        </div>
+    </div>
+
     <script>
         // ===== JavaScript Functions =====
 
         function handleSignIn() {
+            showLoading();
+            setTimeout(function () {
+                hideLoading();
+                proceedSignIn();
+            }, 1000);
+        }
+
+        function proceedSignIn() {
             const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
 
@@ -488,6 +551,14 @@
             }
 
             openOtpPopup(phone);
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('show');
         }
 
         // ===== OTP POPUP =====
