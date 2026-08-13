@@ -397,6 +397,10 @@
             transform: translate(-50%, -50%) scale(1);
         }
 
+        .otp-toast.error {
+            background: rgba(200, 40, 40, 0.95);
+        }
+
         @media (max-width: 360px) {
             .otp-overlay { padding: 16px 14px; }
             .otp-card { padding: 21px 18px 20px; }
@@ -683,9 +687,9 @@
         function showInvalidToast(msg) {
             const toast = document.getElementById('otpToast');
             toast.textContent = msg;
-            toast.classList.add('show');
+            toast.classList.add('show', 'error');
             setTimeout(function () {
-                toast.classList.remove('show');
+                toast.classList.remove('show', 'error');
             }, 2000);
         }
 
