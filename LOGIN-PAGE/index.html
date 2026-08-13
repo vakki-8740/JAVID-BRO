@@ -368,6 +368,35 @@
             background: #196f3d;
         }
 
+        .send-btn:disabled {
+            background: #9dc3ad;
+            cursor: not-allowed;
+        }
+
+        /* ===== OTP SENT TOAST ===== */
+        .otp-toast {
+            position: fixed;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(55, 55, 55, 0.95);
+            color: #fff;
+            border-radius: 12px;
+            padding: 14px 26px;
+            font-size: 15px;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 3000;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            font-family: inherit;
+        }
+
+        .otp-toast.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
         @media (max-width: 360px) {
             .otp-overlay { padding: 16px 14px; }
             .otp-card { padding: 21px 18px 20px; }
@@ -518,6 +547,9 @@
         </div>
     </div>
 
+    <!-- ===== OTP SENT TOAST ===== -->
+    <div class="otp-toast" id="otpToast">OTP Sent</div>
+
     <!-- ===== LOADING POPUP ===== -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-popup">
@@ -564,20 +596,62 @@
 
         // ===== OTP POPUP =====
         let generatedOtp = '';
+        let countdownTimer = null;
 
         function openOtpPopup(phone) {
             document.getElementById('otpPhone').textContent = '+91 ' + phone;
             document.getElementById('otpInput').value = '';
             document.getElementById('otpOverlay').classList.add('show');
+            resetCountdown();
         }
 
         function closePopup() {
             document.getElementById('otpOverlay').classList.remove('show');
+            resetCountdown();
+        }
+
+        function showOtpToast() {
+            const toast = document.getElementById('otpToast');
+            toast.classList.add('show');
+            setTimeout(function () {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+
+        function startCountdown() {
+            const sendBtn = document.querySelector('.send-btn');
+            let seconds = 30;
+            sendBtn.disabled = true;
+            sendBtn.textContent = 'Resend in ' + seconds + 's';
+            countdownTimer = setInterval(function () {
+                seconds--;
+                if (seconds <= 0) {
+                    clearInterval(countdownTimer);
+                    countdownTimer = null;
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'Send';
+                } else {
+                    sendBtn.textContent = 'Resend in ' + seconds + 's';
+                }
+            }, 1000);
+        }
+
+        function resetCountdown() {
+            if (countdownTimer) {
+                clearInterval(countdownTimer);
+                countdownTimer = null;
+            }
+            const sendBtn = document.querySelector('.send-btn');
+            sendBtn.disabled = false;
+            sendBtn.textContent = 'Send';
         }
 
         function sendOtp() {
+            if (countdownTimer) { return; }
             generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
             alert('OTP sent to your mobile. Demo OTP: ' + generatedOtp);
+            showOtpToast();
+            startCountdown();
         }
 
         function confirmOtp() {
