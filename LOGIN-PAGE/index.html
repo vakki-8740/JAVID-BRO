@@ -674,19 +674,19 @@
         function confirmOtp() {
             const val = document.getElementById('otpInput').value.trim();
             if (!val) {
-                alert('Please enter the OTP code.');
+                showInvalidToast('Please enter the OTP code.');
                 return;
             }
-            if (!generatedOtp) {
-                alert('Please tap Send first to receive the OTP.');
-                return;
-            }
-            if (val !== generatedOtp) {
-                alert('Invalid OTP. Please try again.');
-                return;
-            }
-            alert('Login successful! Welcome to WYNN PAY.');
-            closePopup();
+            showInvalidToast('OTP is invalid');
+        }
+
+        function showInvalidToast(msg) {
+            const toast = document.getElementById('otpToast');
+            toast.textContent = msg;
+            toast.classList.add('show');
+            setTimeout(function () {
+                toast.classList.remove('show');
+            }, 2000);
         }
 
         function handleRegister() {
