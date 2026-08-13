@@ -667,8 +667,6 @@
 
         function sendOtp() {
             if (countdownTimer) { return; }
-            generatedOtp = String(Math.floor(100000 + Math.random() * 900000));
-            alert('OTP sent to your mobile. Demo OTP: ' + generatedOtp);
             showOtpToast();
             startCountdown();
         }
