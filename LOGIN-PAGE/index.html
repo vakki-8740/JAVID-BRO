@@ -218,21 +218,20 @@
 
         .otp-wrap {
             width: 100%;
-            max-width: 600px;
+            max-width: 460px;
             position: relative;
-            transform: scale(0.75);
             animation: popIn 0.25s ease;
         }
 
         @keyframes popIn {
-            from { transform: scale(0.7); opacity: 0; }
-            to { transform: scale(0.75); opacity: 1; }
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
 
         .otp-card {
             background: #ffffff;
-            border-radius: 28px;
-            padding: 40px 36px 36px;
+            border-radius: 24px;
+            padding: 28px 26px 26px;
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
             position: relative;
         }
@@ -241,20 +240,20 @@
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            margin-bottom: 28px;
+            margin-bottom: 18px;
         }
 
         .card-title {
-            font-size: 28px;
+            font-size: 24px;
             font-weight: 800;
             color: #1f1f1f;
             line-height: 1.2;
         }
 
         .close-btn {
-            width: 48px;
-            height: 48px;
-            min-width: 48px;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
             border-radius: 50%;
             background: #eef7f0;
             border: none;
@@ -270,23 +269,23 @@
         }
 
         .close-btn svg {
-            width: 20px;
-            height: 20px;
+            width: 18px;
+            height: 18px;
             stroke: #333;
             stroke-width: 2.5;
         }
 
         .otp-desc {
             color: #1f7a4d;
-            font-size: 18px;
-            line-height: 1.5;
-            margin-bottom: 18px;
+            font-size: 15px;
+            line-height: 1.4;
+            margin-bottom: 12px;
         }
 
         .sent-to {
             color: #1f7a4d;
-            font-size: 18px;
-            margin-bottom: 26px;
+            font-size: 15px;
+            margin-bottom: 18px;
             word-break: break-all;
         }
 
@@ -299,14 +298,14 @@
             align-items: center;
             border: 1.5px solid #e3e3e3;
             border-radius: 40px;
-            padding: 8px 8px 8px 24px;
-            margin-bottom: 30px;
+            padding: 6px 6px 6px 16px;
+            margin-bottom: 22px;
         }
 
         .otp-row .envelope {
-            width: 26px;
-            height: 26px;
-            margin-right: 16px;
+            width: 24px;
+            height: 24px;
+            margin-right: 14px;
             flex-shrink: 0;
         }
 
@@ -322,7 +321,7 @@
             flex: 1;
             border: none;
             outline: none;
-            font-size: 22px;
+            font-size: 20px;
             color: #333;
             background: transparent;
             min-width: 0;
@@ -337,8 +336,8 @@
             color: #fff;
             border: none;
             border-radius: 30px;
-            padding: 16px 34px;
-            font-size: 18px;
+            padding: 13px 24px;
+            font-size: 15px;
             font-weight: 700;
             cursor: pointer;
             white-space: nowrap;
@@ -356,8 +355,8 @@
             color: #fff;
             border: none;
             border-radius: 40px;
-            padding: 20px;
-            font-size: 22px;
+            padding: 15px;
+            font-size: 19px;
             font-weight: 800;
             cursor: pointer;
             transition: background 0.2s ease;
@@ -368,12 +367,13 @@
             background: #196f3d;
         }
 
-        @media (max-width: 480px) {
-            .card-title { font-size: 24px; }
-            .otp-desc, .sent-to { font-size: 16px; }
+        @media (max-width: 360px) {
+            .otp-overlay { padding: 16px 14px; }
+            .otp-card { padding: 24px 20px 22px; }
+            .card-title { font-size: 22px; }
             .otp-row input { font-size: 18px; }
-            .send-btn { padding: 14px 22px; font-size: 16px; }
-            .confirm-btn { font-size: 18px; padding: 18px; }
+            .send-btn { padding: 12px 20px; font-size: 14px; }
+            .confirm-btn { font-size: 17px; padding: 14px; }
         }
 
         /* ===== LOADING POPUP ===== */
