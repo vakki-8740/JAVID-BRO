@@ -74,6 +74,90 @@ let sheetMsgId = null;
 let confirmAction = null;
 
 const IDENTITY_STORE = IS_ADMIN ? 'tivra_admin_identity_v1' : 'tivra_identity_v1';
+const AUTO_STORE = 'tivra_autoreply_v1';
+
+const AUTO_REPLIES = [
+    { keys: ['deposit', 'credited', 'credit', 'not received', 'money not'], text: 'We have noted your deposit issue. Our payments team is verifying the transaction and you will get an update shortly.' },
+    { keys: ['withdraw', 'withdrawal', 'payout'], text: 'Your withdrawal request is under review. Payouts are usually processed within 2 to 4 hours once approved.' },
+    { keys: ['kyc', 'verify', 'verification', 'document'], text: 'Please make sure your KYC images are clear with all four corners visible. Our verification team will review them.' },
+    { keys: ['refund', 'money back', 'return'], text: 'Refunds are processed to the same source account and usually reflect within 5 to 7 working days.' },
+    { keys: ['screenshot', 'image', 'proof', 'transaction id', 'txn', 'utr'], text: 'Please share the transaction ID along with a screenshot of the issue so we can check it faster.' },
+    { keys: ['hi', 'hello', 'hey'], text: 'Hello! Welcome to TIVRA Pay support. Please tell us what issue you are facing.' },
+    { keys: ['thanks', 'thank you', 'thx'], text: 'Happy to help. Is there anything else you need assistance with?' },
+    { keys: ['account', 'login', 'lock', 'blocked'], text: 'We have received your account concern. Our team will verify your login details and update you shortly.' },
+    { keys: ['not working', 'error', 'failed'], text: 'Sorry about the trouble. Please tell us which step is failing and we will resolve it.' }
+];
+
+const DEFAULT_REPLY = 'Thank you for reaching out. We have received your message and our support team will get back to you shortly.';
+
+function autoReplyEnabled() {
+    return localStorage.getItem(AUTO_STORE) !== 'off';
+}
+
+function setAutoReply(on) {
+    localStorage.setItem(AUTO_STORE, on ? 'on' : 'off');
+}
+
+function pickAutoReply(text) {
+    const t = String(text || '').toLowerCase();
+    for (let i = 0; i < AUTO_REPLIES.length; i++) {
+        const r = AUTO_REPLIES[i];
+        for (let k = 0; k < r.keys.length; k++) {
+            if (t.includes(r.keys[k])) return r.text;
+        }
+    }
+    return DEFAULT_REPLY;
+}
+
+const autoChip = document.getElementById('autoChip');
+
+let typingChatId = null;
+
+function showTyping(id) {
+    typingChatId = id;
+    const chat = getChat(id);
+    if (chat) renderConversation(chat);
+}
+
+function hideTyping() {
+    typingChatId = null;
+}
+
+function maybeAutoReply(chatId) {
+    if (IS_ADMIN) return;
+    if (!autoReplyEnabled()) return;
+
+    const chat = getChat(chatId);
+    if (!chat) return;
+
+    const msgs = chat.messages || [];
+    const last = msgs[msgs.length - 1];
+    if (!last || last.from !== 'user') return;
+
+    const adminTookOver = msgs.some(function(m) { return m.from === 'admin' && !m.auto; });
+    if (adminTookOver) return;
+
+    showTyping(chatId);
+
+    setTimeout(function() {
+        hideTyping();
+
+        const fresh = getChat(chatId);
+        if (!fresh) return;
+        const freshMsgs = fresh.messages || [];
+        const freshLast = freshMsgs[freshMsgs.length - 1];
+        if (!freshLast || freshLast.from !== 'user') return;
+
+        try {
+            addMessage(chatId, { from: 'admin', text: pickAutoReply(freshLast.text), auto: true });
+        } catch (e) {
+            showToast('Browser storage is full, could not save');
+            return;
+        }
+
+        openChat(chatId);
+    }, 2400);
+}
 
 function currentIdentity() {
     try {
@@ -226,10 +310,16 @@ function renderConversation(chat) {
         html += '<div class="ms-msg ' + (mine ? 'out' : 'in') + '" data-msg-id="' + m.id + '">' +
             '<div class="ms-bubble">' + body +
                 '<span class="ms-bubble-time">' + fmtTime(m.at) +
-                (m.edited ? ' · edited' : '') + '</span>' +
+                (m.auto ? ' · auto' : '') + (m.edited ? ' · edited' : '') + '</span>' +
             '</div>' +
         '</div>';
     });
+
+    if (typingChatId) {
+        html += '<div class="ms-msg in typing">' +
+            '<div class="ms-bubble"><span class="ms-typing"><i></i><i></i><i></i></span></div>' +
+        '</div>';
+    }
 
     messagesBox.innerHTML = html;
 }
@@ -292,6 +382,25 @@ function fact(k, v) {
     return '<div class="fact"><span class="fact-k">' + k + '</span><span class="fact-v">' + escapeHtml(v) + '</span></div>';
 }
 
+function renderAutoChip() {
+    if (IS_ADMIN || !autoChip) return;
+    const on = autoReplyEnabled();
+    autoChip.textContent = 'Auto: ' + (on ? 'On' : 'Off');
+    autoChip.classList.toggle('off', !on);
+    autoChip.title = on
+        ? 'Auto reply is on. Tap to switch off when an agent replies.'
+        : 'Auto reply is off. Tap to switch on.';
+}
+
+if (autoChip) {
+    autoChip.addEventListener('click', function() {
+        const next = !autoReplyEnabled();
+        setAutoReply(next);
+        renderAutoChip();
+        showToast(next ? 'Auto reply switched on' : 'Auto reply switched off');
+    });
+}
+
 function sendText() {
     const text = messageInput.value.trim();
     if (!text || !activeChatId) return;
@@ -300,6 +409,7 @@ function sendText() {
     messageInput.value = '';
     openChat(activeChatId);
     messageInput.focus();
+    maybeAutoReply(activeChatId);
 }
 
 function openAttachMenu() {
@@ -331,6 +441,7 @@ async function sendFile(kind, file) {
 
     openChat(activeChatId);
     showToast(kind === 'image' ? 'Image sent' : 'File sent');
+    maybeAutoReply(activeChatId);
 }
 
 function openMsgSheet(msgId) {
@@ -387,6 +498,7 @@ if (newChatForm) newChatForm.addEventListener('submit', function(e) {
     renderList();
     openChat(chat.id);
     showToast('Chat started');
+    maybeAutoReply(chat.id);
 });
 
 gateForm.addEventListener('submit', function(e) {
@@ -654,6 +766,7 @@ document.addEventListener('keydown', function(e) {
 });
 
 renderList();
+renderAutoChip();
 
 if (currentIdentity()) closeLayer(gatePopup);
 else openLayer(gatePopup);
