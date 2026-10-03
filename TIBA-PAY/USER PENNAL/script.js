@@ -1,6 +1,113 @@
 const LOAD_SECONDS = 5;
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
+const STORE_KEY = 'tivra_chats_v1';
+const IDENTITY_KEY = 'tivra_identity_v1';
+
+function newId() {
+    return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+function readChats() {
+    try {
+        const raw = JSON.parse(localStorage.getItem(STORE_KEY));
+        return Array.isArray(raw) ? raw : [];
+    } catch (e) {
+        return [];
+    }
+}
+
+function writeChats(list) {
+    localStorage.setItem(STORE_KEY, JSON.stringify(list));
+}
+
+function addChat(chat) {
+    const list = readChats();
+    list.unshift(chat);
+    writeChats(list);
+    return chat;
+}
+
+function getChat(id) {
+    return readChats().find(function(c) { return c.id === id; }) || null;
+}
+
+function updateChat(id, mutator) {
+    const list = readChats();
+    const idx = list.findIndex(function(c) { return c.id === id; });
+    if (idx === -1) return null;
+    mutator(list[idx]);
+    writeChats(list);
+    return list[idx];
+}
+
+function deleteChat(id) {
+    writeChats(readChats().filter(function(c) { return c.id !== id; }));
+}
+
+function getIdentity() {
+    try {
+        return JSON.parse(localStorage.getItem(IDENTITY_KEY)) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function setIdentity(uid, phone) {
+    localStorage.setItem(IDENTITY_KEY, JSON.stringify({ uid: uid, phone: phone }));
+}
+
+function formatSize(bytes) {
+    if (!bytes) return '';
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return Math.round(bytes / 1024) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function escapeHtml(text) {
+    return String(text == null ? '' : text)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+}
+
+function compressImage(file, maxDim, quality) {
+    maxDim = maxDim || 1280;
+    quality = quality || 0.82;
+
+    return new Promise(function(resolve, reject) {
+        if (!file) return reject(new Error('no file'));
+
+        const reader = new FileReader();
+        reader.onerror = function() { reject(new Error('read failed')); };
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onerror = function() { resolve(e.target.result); };
+            img.onload = function() {
+                let w = img.naturalWidth;
+                let h = img.naturalHeight;
+                const scale = Math.min(1, maxDim / Math.max(w, h));
+                w = Math.round(w * scale);
+                h = Math.round(h * scale);
+
+                const canvas = document.createElement('canvas');
+                canvas.width = w;
+                canvas.height = h;
+
+                const ctx = canvas.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, w, h);
+                ctx.drawImage(img, 0, 0, w, h);
+
+                resolve(canvas.toDataURL('image/jpeg', quality));
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
 const supportForm = document.getElementById('supportForm');
 const fullName = document.getElementById('fullName');
 const uidField = document.getElementById('uid');
@@ -95,7 +202,29 @@ function resetImage() {
 }
 
 async function submitComplaint(payload) {
-    return true;
+    let image = null;
+    try {
+        image = await compressImage(payload.imageData);
+    } catch (e) {
+        image = null;
+    }
+
+    try {
+        addChat({
+            id: newId(),
+            issue: payload.issue,
+            name: payload.name,
+            uid: payload.uid,
+            phone: payload.phone,
+            amount: payload.amount,
+            createdAt: new Date().toISOString(),
+            messages: [{ from: 'user', text: '', image: image, at: new Date().toISOString() }]
+        });
+        return true;
+    } catch (e) {
+        showToast('Browser storage is full, complaint could not be saved');
+        return false;
+    }
 }
 
 function runLoading() {
@@ -274,7 +403,7 @@ const chatTrigger = document.querySelector('[data-coming-soon]');
 if (chatTrigger) {
     chatTrigger.addEventListener('click', function(e) {
         e.preventDefault();
-        showToast(chatTrigger.dataset.comingSoon);
+        window.location.href = 'chat.html';
     });
 }
 
