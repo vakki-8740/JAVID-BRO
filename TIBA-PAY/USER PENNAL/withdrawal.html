@@ -1,0 +1,108 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdrawal Problem - TIVRA Pay Help Center</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-page="withdrawal">
+
+    <header class="site-header">
+        <div class="header-inner">
+            <a href="index.html" class="brand">
+                <img src="LOGO/logo.png" alt="TIVRA Pay" class="brand-logo">
+                <span class="brand-name">TIVRA Pay</span>
+            </a>
+            <span class="header-badge">Help Center</span>
+        </div>
+    </header>
+
+    <main class="page-wrap">
+
+        <a href="index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="15 18 9 12 15 6"/>
+            </svg>
+            All issues
+        </a>
+
+        <section class="page-hero">
+            <h1>Withdrawal Problem</h1>
+        </section>
+
+        <form class="support-form" id="supportForm" data-issue="Withdrawal Problem" novalidate>
+
+            <div class="field">
+                <label for="fullName">Full Name</label>
+                <input type="text" id="fullName" placeholder="Enter your name" autocomplete="name">
+                <small class="err" data-for="fullName"></small>
+            </div>
+
+            <div class="field">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" placeholder="Enter your email" autocomplete="email">
+                <small class="err" data-for="email"></small>
+            </div>
+
+            <div class="field">
+                <label for="phone">Phone Number</label>
+                <input type="tel" id="phone" placeholder="Enter phone number" maxlength="15" autocomplete="tel">
+                <small class="err" data-for="phone"></small>
+            </div>
+
+            <div class="field">
+                <label for="txnId">Withdrawal Request ID</label>
+                <input type="text" id="txnId" placeholder="e.g. WDR778899001">
+                <small class="err" data-for="txnId"></small>
+            </div>
+
+            <div class="field">
+                <label for="amount">Amount</label>
+                <input type="text" id="amount" placeholder="e.g. 12000" inputmode="decimal">
+                <small class="err" data-for="amount"></small>
+            </div>
+
+            <div class="field">
+                <label for="method">Payout Status</label>
+                <select id="method">
+                    <option value="">Select a status</option>
+                    <option>Pending</option>
+                    <option>Rejected</option>
+                    <option>Approved but not received</option>
+                    <option>Debited but not credited</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="message">What happened?</label>
+                <textarea id="message" rows="4" placeholder="e.g. I requested a withdrawal of 12000 four days ago, status still shows pending."></textarea>
+                <small class="err" data-for="message"></small>
+            </div>
+
+            <button type="submit" class="submit-btn">Submit Request</button>
+        </form>
+
+    </main>
+
+    <!-- ===== SUCCESS POPUP ===== -->
+    <div class="success-popup" id="successPopup" hidden>
+        <div class="success-box">
+            <div class="check-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="5 12 9 16 19 6"/>
+                </svg>
+            </div>
+            <h2>Request Received</h2>
+            <p id="successNote">Our support team will contact you shortly.</p>
+            <button class="done-btn" id="doneBtn">Close</button>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <p>&copy; TIVRA Pay Support. Need urgent help? Call 1800-000-000</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
