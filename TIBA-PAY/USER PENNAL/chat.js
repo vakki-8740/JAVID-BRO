@@ -38,10 +38,13 @@ const editIssue = document.getElementById('editIssue');
 const confirmPopup = document.getElementById('confirmPopup');
 const confirmDelete = document.getElementById('confirmDelete');
 
-const replyPopup = document.getElementById('replyPopup');
-const replyForm = document.getElementById('replyForm');
-const replyText = document.getElementById('replyText');
-const replyTo = document.getElementById('replyTo');
+const newChatPopup = document.getElementById('newChatPopup');
+const newChatForm = document.getElementById('newChatForm');
+const newChatTopic = document.getElementById('newChatTopic');
+const newChatText = document.getElementById('newChatText');
+
+const messageInput = document.getElementById('messageInput');
+const sendMessageBtn = document.getElementById('sendMessageBtn');
 
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
@@ -169,7 +172,7 @@ function renderDetail(chat) {
         if (m.text) body += '<span class="msg-text">' + escapeHtml(m.text) + '</span>';
 
         return '<div class="msg ' + (mine ? 'admin' : 'user') + '">' +
-            '<span class="msg-from">' + (mine ? 'Support' : 'User') + '</span>' +
+            '<span class="msg-from">' + (mine ? 'Support' : 'You') + '</span>' +
             '<span class="msg-bubble">' + body + '</span>' +
             '<span class="msg-at">' + fmtDate(m.at) + ' &middot; ' + fmtTime(m.at) + '</span>' +
         '</div>';
@@ -208,15 +211,6 @@ function openCompose(mode) {
     composeNote.value = '';
     populateCompose();
     openModal(composePopup);
-}
-
-function openReply() {
-    const chat = getChat(activeChatId);
-    if (!chat) return;
-    replyTo.textContent = 'Replying to ' + (chat.name || 'this chat') + ' (UID ' + (chat.uid || '-') + ')';
-    replyText.value = '';
-    openModal(replyPopup);
-    replyText.focus();
 }
 
 function openEdit(id) {
@@ -300,6 +294,69 @@ chatList.addEventListener('click', function(e) {
 
 searchField.addEventListener('input', renderList);
 
+document.getElementById('newChatBtn').addEventListener('click', function() {
+    const id = getIdentity() || {};
+    newChatText.value = '';
+    setError(newChatText, '');
+    newChatForm.dataset.uid = id.uid || '';
+    newChatForm.dataset.phone = id.phone || '';
+    openModal(newChatPopup);
+    newChatText.focus();
+});
+
+newChatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const text = newChatText.value.trim();
+    if (text.length < 2) {
+        setError(newChatText, 'Please type your message');
+        return;
+    }
+
+    const id = getIdentity() || {};
+    const chat = {
+        id: newId(),
+        issue: newChatTopic.value,
+        name: 'Guest',
+        uid: id.uid || '',
+        phone: id.phone || '',
+        amount: '',
+        createdAt: new Date().toISOString(),
+        messages: [{ from: 'user', text: text, at: new Date().toISOString() }]
+    };
+
+    addChat(chat);
+    closeModal(newChatPopup);
+    renderList();
+    openChat(chat.id);
+    showToast('Chat started');
+});
+
+function sendMessage() {
+    const text = messageInput.value.trim();
+    if (!text || !activeChatId) return;
+
+    appendMessage(activeChatId, {
+        from: 'user',
+        text: text,
+        at: new Date().toISOString()
+    });
+
+    messageInput.value = '';
+    renderList();
+    openChat(activeChatId);
+    messageInput.focus();
+}
+
+sendMessageBtn.addEventListener('click', sendMessage);
+
+messageInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
 document.getElementById('sendImageBtn').addEventListener('click', function() { openCompose('image'); });
 document.getElementById('sendFileBtn').addEventListener('click', function() { openCompose('file'); });
 
@@ -320,7 +377,7 @@ composeForm.addEventListener('submit', async function(e) {
     }
     setError(composeFile, '');
 
-    const message = { from: 'admin', text: note, at: new Date().toISOString() };
+    const message = { from: 'user', text: note, at: new Date().toISOString() };
 
     if (composeMode === 'image') {
         try {
@@ -416,7 +473,8 @@ chatModal.addEventListener('click', function(e) {
             openModal(confirmPopup);
         }
         if (action === 'reply') {
-            openReply();
+            messageInput.focus();
+            messageInput.scrollIntoView({ block: 'nearest' });
             return;
         }
         return;
@@ -437,31 +495,6 @@ chatModal.addEventListener('click', function(e) {
         const last = chat && lastMessageOf(chat);
         if (last && last.image) openLightbox(last.image, (chat.name || 'chat') + '-image.jpg');
     }
-});
-
-replyForm.addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const text = replyText.value.trim();
-    if (!text) {
-        setError(replyText, 'Please type your reply');
-        return;
-    }
-
-    appendMessage(activeChatId, {
-        from: 'admin',
-        text: text,
-        at: new Date().toISOString()
-    });
-
-    closeModal(replyPopup);
-    renderList();
-    openChat(activeChatId);
-    showToast('Reply sent');
-});
-
-replyText.addEventListener('input', function() {
-    setError(this, '');
 });
 
 confirmDelete.addEventListener('click', function() {

@@ -40,6 +40,13 @@
         </div>
 
         <div class="chat-toolbar">
+            <button type="button" class="tool-btn primary" id="newChatBtn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                New Chat
+            </button>
             <button type="button" class="tool-btn" id="sendImageBtn">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="3" width="18" height="18" rx="3"/>
@@ -115,6 +122,16 @@
             <div class="detail-facts" id="detailFacts"></div>
 
             <div class="detail-messages" id="detailMessages"></div>
+
+            <div class="chat-composer">
+                <input type="text" id="messageInput" placeholder="Type your message">
+                <button type="button" class="send-btn" id="sendMessageBtn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13"/>
+                        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                    </svg>
+                </button>
+            </div>
 
             <div class="detail-actions">
                 <button type="button" class="detail-btn" data-action="edit">
@@ -221,26 +238,34 @@
         </div>
     </div>
 
-    <!-- ===== REPLY ===== -->
-    <div class="modal-overlay" id="replyPopup" hidden>
+    <!-- ===== NEW CHAT ===== -->
+    <div class="modal-overlay" id="newChatPopup" hidden>
         <div class="modal-box">
             <div class="detail-head">
-                <h2>Reply</h2>
-                <button type="button" class="icon-close" data-close="replyPopup" aria-label="Close">
+                <h2>New Chat</h2>
+                <button type="button" class="icon-close" data-close="newChatPopup" aria-label="Close">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
                         <line x1="18" y1="6" x2="6" y2="18"/>
                         <line x1="6" y1="6" x2="18" y2="18"/>
                     </svg>
                 </button>
             </div>
-            <p class="modal-sub" id="replyTo">Replying to this chat.</p>
-            <form id="replyForm" novalidate>
+            <form id="newChatForm" novalidate>
                 <div class="field">
-                    <label for="replyText">Your Message</label>
-                    <textarea id="replyText" rows="4" placeholder="Type your reply"></textarea>
+                    <label for="newChatTopic">Topic</label>
+                    <select id="newChatTopic">
+                        <option>Deposit Problem</option>
+                        <option>Withdrawal Problem</option>
+                        <option>Account Verification Problem</option>
+                        <option>General Query</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="newChatText">Message</label>
+                    <textarea id="newChatText" rows="3" placeholder="Describe your issue"></textarea>
                     <small class="err"></small>
                 </div>
-                <button type="submit" class="submit-btn">Send Reply</button>
+                <button type="submit" class="submit-btn">Start Chat</button>
             </form>
         </div>
     </div>
