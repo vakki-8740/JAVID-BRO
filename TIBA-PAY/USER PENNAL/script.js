@@ -45,6 +45,26 @@ function deleteChat(id) {
     writeChats(readChats().filter(function(c) { return c.id !== id; }));
 }
 
+function addMessage(chatId, message) {
+    return updateChat(chatId, function(chat) {
+        if (!Array.isArray(chat.messages)) chat.messages = [];
+        chat.messages.push(Object.assign({ id: newId(), at: new Date().toISOString(), edited: false }, message));
+    });
+}
+
+function updateMessage(chatId, msgId, patch) {
+    return updateChat(chatId, function(chat) {
+        const msg = (chat.messages || []).find(function(m) { return m.id === msgId; });
+        if (msg) Object.assign(msg, patch);
+    });
+}
+
+function deleteMessage(chatId, msgId) {
+    return updateChat(chatId, function(chat) {
+        chat.messages = (chat.messages || []).filter(function(m) { return m.id !== msgId; });
+    });
+}
+
 function getIdentity() {
     try {
         return JSON.parse(localStorage.getItem(IDENTITY_KEY)) || null;
@@ -218,7 +238,7 @@ async function submitComplaint(payload) {
             phone: payload.phone,
             amount: payload.amount,
             createdAt: new Date().toISOString(),
-            messages: [{ from: 'user', text: '', image: image, at: new Date().toISOString() }]
+            messages: [{ id: newId(), from: 'user', text: '', image: image, at: new Date().toISOString(), edited: false }]
         });
         return true;
     } catch (e) {

@@ -1,33 +1,49 @@
+const IS_ADMIN = document.body.dataset.page === 'admin';
+const SIDE = IS_ADMIN ? 'admin' : 'user';
+
+const listPane = document.getElementById('listPane');
+const chatPane = document.getElementById('chatPane');
 const chatList = document.getElementById('chatList');
 const emptyState = document.getElementById('emptyState');
 const searchField = document.getElementById('chatSearch');
-const identityBar = document.getElementById('identityBar');
-const identityName = document.getElementById('identityName');
-const identityMeta = document.getElementById('identityMeta');
-const changeIdentityBtn = document.getElementById('changeIdentity');
+
+const backBtn = document.getElementById('backBtn');
+const peerBtn = document.getElementById('peerBtn');
+const peerAvatar = document.getElementById('peerAvatar');
+const peerName = document.getElementById('peerName');
+const peerStatus = document.getElementById('peerStatus');
+const chatMenuBtn = document.getElementById('chatMenuBtn');
+const messagesBox = document.getElementById('messages');
+
+const attachBtn = document.getElementById('attachBtn');
+const attachMenu = document.getElementById('attachMenu');
+const messageInput = document.getElementById('messageInput');
+const sendBtn = document.getElementById('sendBtn');
+const imageInput = document.getElementById('imageInput');
+const fileInput = document.getElementById('fileInput');
 
 const gatePopup = document.getElementById('gatePopup');
 const gateForm = document.getElementById('gateForm');
 const gateUid = document.getElementById('gateUid');
 const gatePhone = document.getElementById('gatePhone');
 
-const chatModal = document.getElementById('chatModal');
-const detailName = document.getElementById('detailName');
-const detailIssue = document.getElementById('detailIssue');
-const detailFacts = document.getElementById('detailFacts');
-const detailMessages = document.getElementById('detailMessages');
+const newChatPopup = document.getElementById('newChatPopup');
+const newChatForm = document.getElementById('newChatForm');
+const newChatTopic = document.getElementById('newChatTopic');
+const newChatText = document.getElementById('newChatText');
+const newChatBtn = document.getElementById('newChatBtn');
+const emptyNewChat = document.getElementById('emptyNewChat');
 
-const composePopup = document.getElementById('composePopup');
-const composeTitle = document.getElementById('composeTitle');
-const composeForm = document.getElementById('composeForm');
-const composeChat = document.getElementById('composeChat');
-const composeFile = document.getElementById('composeFile');
-const composeFileLabel = document.getElementById('composeFileLabel');
-const composeNote = document.getElementById('composeNote');
+const infoPopup = document.getElementById('infoPopup');
+const infoAvatar = document.getElementById('infoAvatar');
+const infoName = document.getElementById('infoName');
+const infoTopic = document.getElementById('infoTopic');
+const infoFacts = document.getElementById('infoFacts');
+const infoEditBtn = document.getElementById('infoEditBtn');
+const infoDeleteBtn = document.getElementById('infoDeleteBtn');
 
 const editPopup = document.getElementById('editPopup');
 const editForm = document.getElementById('editForm');
-const editId = document.getElementById('editId');
 const editName = document.getElementById('editName');
 const editUid = document.getElementById('editUid');
 const editPhone = document.getElementById('editPhone');
@@ -35,16 +51,17 @@ const editAmount = document.getElementById('editAmount');
 const editAmountField = document.getElementById('editAmountField');
 const editIssue = document.getElementById('editIssue');
 
+const msgSheet = document.getElementById('msgSheet');
+const msgSheetHead = document.getElementById('msgSheetHead');
+
+const editMsgPopup = document.getElementById('editMsgPopup');
+const editMsgForm = document.getElementById('editMsgForm');
+const editMsgText = document.getElementById('editMsgText');
+
 const confirmPopup = document.getElementById('confirmPopup');
-const confirmDelete = document.getElementById('confirmDelete');
-
-const newChatPopup = document.getElementById('newChatPopup');
-const newChatForm = document.getElementById('newChatForm');
-const newChatTopic = document.getElementById('newChatTopic');
-const newChatText = document.getElementById('newChatText');
-
-const messageInput = document.getElementById('messageInput');
-const sendMessageBtn = document.getElementById('sendMessageBtn');
+const confirmTitle = document.getElementById('confirmTitle');
+const confirmText = document.getElementById('confirmText');
+const confirmOk = document.getElementById('confirmOk');
 
 const lightbox = document.getElementById('lightbox');
 const lightboxImg = document.getElementById('lightboxImg');
@@ -52,38 +69,66 @@ const lightboxName = document.getElementById('lightboxName');
 const lightboxDownload = document.getElementById('lightboxDownload');
 const lightboxClose = document.getElementById('lightboxClose');
 
-let composeMode = 'image';
 let activeChatId = null;
-let pendingDeleteId = null;
+let sheetMsgId = null;
+let confirmAction = null;
 
-function fmtDate(iso) {
-    const d = new Date(iso);
-    return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+const IDENTITY_STORE = IS_ADMIN ? 'tivra_admin_identity_v1' : 'tivra_identity_v1';
+
+function currentIdentity() {
+    try {
+        return JSON.parse(localStorage.getItem(IDENTITY_STORE)) || null;
+    } catch (e) {
+        return null;
+    }
+}
+
+function saveIdentity(uid, phone) {
+    localStorage.setItem(IDENTITY_STORE, JSON.stringify({ uid: uid, phone: phone }));
+}
+
+const AVATAR_COLORS = ['#e53935', '#8e24aa', '#3949ab', '#00897b', '#f57c00', '#5e35b1', '#c2185b', '#00796b'];
+
+function avatarFor(seed) {
+    const text = String(seed || '?');
+    let hash = 0;
+    for (let i = 0; i < text.length; i++) hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
+    const color = AVATAR_COLORS[hash % AVATAR_COLORS.length];
+    const initials = text.trim().slice(0, 2).toUpperCase() || '?';
+    return { color: color, initials: initials };
+}
+
+function applyAvatar(el, seed) {
+    const a = avatarFor(seed);
+    el.textContent = a.initials;
+    el.style.background = a.color;
 }
 
 function fmtTime(iso) {
-    const d = new Date(iso);
-    return d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+    return new Date(iso).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
 }
 
-function openModal(el) {
+function fmtDate(iso) {
+    return new Date(iso).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function openLayer(el) {
     el.hidden = false;
     document.body.classList.add('is-locked');
 }
 
-function closeModal(el) {
+function closeLayer(el) {
     el.hidden = true;
-    if (document.querySelectorAll('.modal-overlay:not([hidden]), .lightbox:not([hidden])').length === 0) {
-        document.body.classList.remove('is-locked');
-    }
+    const open = document.querySelectorAll('.modal-overlay:not([hidden]), .sheet-overlay:not([hidden]), .lightbox:not([hidden])');
+    if (open.length === 0) document.body.classList.remove('is-locked');
 }
 
 function lastMessageOf(chat) {
-    const msgs = chat.messages || [];
-    return msgs.length ? msgs[msgs.length - 1] : null;
+    const m = chat.messages || [];
+    return m.length ? m[m.length - 1] : null;
 }
 
-function previewText(chat) {
+function previewOf(chat) {
     const last = lastMessageOf(chat);
     if (!last) return 'No message';
     if (last.text) return last.text;
@@ -92,16 +137,18 @@ function previewText(chat) {
     return 'No message';
 }
 
+function unreadCount(chat) {
+    const mine = SIDE === 'admin' ? 'user' : 'admin';
+    return (chat.messages || []).filter(function(m) { return m.from === mine && !m.readBy && m.from !== SIDE; }).length;
+}
+
 function renderList() {
     const term = (searchField.value || '').trim().toLowerCase();
     let chats = readChats();
 
     if (term) {
         chats = chats.filter(function(c) {
-            return [c.name, c.uid, c.phone, c.issue, c.amount]
-                .join(' ')
-                .toLowerCase()
-                .includes(term);
+            return [c.name, c.uid, c.phone, c.issue, c.amount].join(' ').toLowerCase().includes(term);
         });
     }
 
@@ -115,151 +162,247 @@ function renderList() {
     chatList.innerHTML = chats.map(function(c) {
         const last = lastMessageOf(c);
         const stamp = last ? fmtTime(last.at) : '';
-        const img = last && last.image;
-        return '<button type="button" class="chat-card" data-id="' + c.id + '">' +
-            '<span class="chat-thumb">' +
-                (img ? '<img src="' + img + '" alt="">' : '<span class="chat-thumb-icon">CH</span>') +
-            '</span>' +
-            '<span class="chat-body">' +
-                '<span class="chat-row">' +
-                    '<span class="chat-name">' + escapeHtml(c.name || 'Unknown') + '</span>' +
-                    '<span class="chat-time">' + stamp + '</span>' +
+        const unread = unreadCount(c);
+        const preview = last && last.from === SIDE ? 'You: ' + previewOf(c) : previewOf(c);
+        const avatarSeed = c.uid || c.name || c.id;
+
+        return '<button type="button" class="ms-chat-row' + (unread ? ' unread' : '') + '" data-id="' + c.id + '">' +
+            '<span class="ms-avatar" data-seed="' + escapeHtml(avatarSeed) + '"></span>' +
+            '<span class="ms-row-main">' +
+                '<span class="ms-row-top">' +
+                    '<span class="ms-row-name">' + escapeHtml(c.name || 'Guest') + '</span>' +
+                    '<span class="ms-row-time">' + stamp + '</span>' +
                 '</span>' +
-                '<span class="chat-issue">' + escapeHtml(c.issue || '') + '</span>' +
-                '<span class="chat-preview">' + escapeHtml(previewText(c)) + '</span>' +
-                '<span class="chat-tags">' +
-                    '<span class="chat-tag">UID ' + escapeHtml(c.uid || '-') + '</span>' +
-                    '<span class="chat-tag">' + escapeHtml(c.phone || '-') + '</span>' +
-                    (c.amount ? '<span class="chat-tag amt">' + escapeHtml(c.amount) + '</span>' : '') +
-                '</span>' +
+                '<span class="ms-row-topic">' + escapeHtml(c.issue || '') + '</span>' +
+                '<span class="ms-row-msg">' + escapeHtml(preview) + '</span>' +
             '</span>' +
+            (unread ? '<span class="ms-unread">' + unread + '</span>' : '') +
         '</button>';
     }).join('');
+
+    chatList.querySelectorAll('.ms-avatar[data-seed]').forEach(function(el) {
+        applyAvatar(el, el.dataset.seed);
+    });
 }
 
-function renderDetail(chat) {
-    detailName.textContent = chat.name || 'Unknown';
-    detailIssue.textContent = chat.issue || '';
-
-    const last = lastMessageOf(chat);
-    const created = chat.createdAt;
-
-    detailFacts.innerHTML =
-        '<div class="fact"><span class="fact-k">Date</span><span class="fact-v">' + fmtDate(created) + '</span></div>' +
-        '<div class="fact"><span class="fact-k">Time</span><span class="fact-v">' + fmtTime(created) + '</span></div>' +
-        '<div class="fact"><span class="fact-k">UID</span><span class="fact-v">' + escapeHtml(chat.uid || '-') + '</span></div>' +
-        '<div class="fact"><span class="fact-k">Mobile</span><span class="fact-v">' + escapeHtml(chat.phone || '-') + '</span></div>' +
-        (chat.amount ? '<div class="fact"><span class="fact-k">Amount</span><span class="fact-v">' + escapeHtml(chat.amount) + '</span></div>' : '') +
-        '<div class="fact"><span class="fact-k">Last Activity</span><span class="fact-v">' + (last ? fmtTime(last.at) : '-') + '</span></div>' +
-        '<div class="fact"><span class="fact-k">Messages</span><span class="fact-v">' + ((chat.messages || []).length) + '</span></div>';
+function renderConversation(chat) {
+    applyAvatar(peerAvatar, chat.uid || chat.name || chat.id);
+    peerName.textContent = chat.name || 'Guest';
+    peerStatus.textContent = (chat.issue || '') + (chat.phone ? ' · ' + chat.phone : '');
 
     const msgs = chat.messages || [];
-    detailMessages.innerHTML = msgs.map(function(m, i) {
-        const mine = m.from === 'admin';
-        let body = '';
-        if (m.image) {
-            body += '<img class="msg-image" src="' + m.image + '" alt="Attachment" data-msg="' + i + '">';
-        }
-        if (m.file) {
-            body += '<span class="msg-file">' +
-                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
-                '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
-                '<polyline points="14 2 14 8 20 8"/></svg>' +
-                escapeHtml(m.file.name) +
-                (m.file.size ? '<em>' + formatSize(m.file.size) + '</em>' : '') +
-            '</span>';
-        }
-        if (m.text) body += '<span class="msg-text">' + escapeHtml(m.text) + '</span>';
-
-        return '<div class="msg ' + (mine ? 'admin' : 'user') + '">' +
-            '<span class="msg-from">' + (mine ? 'Support' : 'You') + '</span>' +
-            '<span class="msg-bubble">' + body + '</span>' +
-            '<span class="msg-at">' + fmtDate(m.at) + ' &middot; ' + fmtTime(m.at) + '</span>' +
-        '</div>';
-    }).join('');
-}
-
-function openChat(id) {
-    const chat = getChat(id);
-    if (!chat) return;
-    activeChatId = id;
-    renderDetail(chat);
-    openModal(chatModal);
-}
-
-function populateCompose() {
-    composeChat.innerHTML = readChats().map(function(c) {
-        const label = (c.name || 'Unknown') + ' (UID ' + (c.uid || '-') + ')';
-        return '<option value="' + c.id + '">' + escapeHtml(label) + '</option>';
-    }).join('');
-
-    if (activeChatId) composeChat.value = activeChatId;
-}
-
-function openCompose(mode) {
-    const chats = readChats();
-    if (!chats.length) {
-        showToast('No chats available yet');
+    if (!msgs.length) {
+        messagesBox.innerHTML = '<div class="ms-no-msgs">No messages yet. Say hello.</div>';
         return;
     }
 
-    composeMode = mode;
-    composeTitle.textContent = mode === 'image' ? 'Send Image' : 'Send File';
-    composeFileLabel.textContent = mode === 'image' ? 'Choose Image' : 'Choose File (PDF etc)';
-    composeFile.accept = mode === 'image' ? 'image/*' : '.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.csv';
-    composeFile.value = '';
-    composeNote.value = '';
-    populateCompose();
-    openModal(composePopup);
+    let lastDay = '';
+    let html = '';
+
+    msgs.forEach(function(m) {
+        const day = fmtDate(m.at);
+        if (day !== lastDay) {
+            html += '<div class="ms-daysep"><span>' + day + '</span></div>';
+            lastDay = day;
+        }
+
+        const mine = m.from === SIDE;
+        let body = '';
+
+        if (m.image) {
+            body += '<img class="ms-bubble-img" src="' + m.image + '" alt="Image" data-img="1">';
+        }
+        if (m.file) {
+            body += '<span class="ms-bubble-file">' +
+                '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">' +
+                '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>' +
+                '<polyline points="14 2 14 8 20 8"/></svg>' +
+                '<span class="ms-file-text">' + escapeHtml(m.file.name) +
+                (m.file.size ? '<em>' + formatSize(m.file.size) + '</em>' : '') + '</span>' +
+            '</span>';
+        }
+        if (m.text) body += '<span class="ms-bubble-text">' + escapeHtml(m.text) + '</span>';
+
+        html += '<div class="ms-msg ' + (mine ? 'out' : 'in') + '" data-msg-id="' + m.id + '">' +
+            '<div class="ms-bubble">' + body +
+                '<span class="ms-bubble-time">' + fmtTime(m.at) +
+                (m.edited ? ' · edited' : '') + '</span>' +
+            '</div>' +
+        '</div>';
+    });
+
+    messagesBox.innerHTML = html;
 }
 
-function openEdit(id) {
+function scrollToBottom() {
+    messagesBox.scrollTop = messagesBox.scrollHeight;
+}
+
+function openChat(id, skipScroll) {
     const chat = getChat(id);
     if (!chat) return;
 
-    editId.value = id;
-    editName.value = chat.name || '';
-    editUid.value = chat.uid || '';
-    editPhone.value = chat.phone || '';
-    editAmount.value = chat.amount || '';
-    editIssue.value = chat.issue || 'Deposit Problem';
-    editAmountField.hidden = !chat.amount;
+    activeChatId = id;
 
-    openModal(editPopup);
+    if (SIDE === 'admin') {
+        updateChat(id, function(c) {
+            (c.messages || []).forEach(function(m) {
+                if (m.from === 'admin') m.readBy = true;
+            });
+        });
+    }
+
+    const fresh = getChat(id) || chat;
+    renderConversation(fresh);
+    chatPane.hidden = false;
+    document.body.classList.add('chat-open');
+    if (!skipScroll) requestAnimationFrame(scrollToBottom);
+    renderList();
 }
 
-function openLightbox(src, name) {
-    lightboxImg.src = src;
-    lightboxName.textContent = name || 'Image';
-    lightboxDownload.href = src;
-    lightboxDownload.setAttribute('download', name || 'image.jpg');
-    openModal(lightbox);
+function closeChat() {
+    activeChatId = null;
+    chatPane.hidden = true;
+    document.body.classList.remove('chat-open');
+    renderList();
 }
 
-function appendMessage(chatId, message) {
-    return updateChat(chatId, function(chat) {
-        if (!Array.isArray(chat.messages)) chat.messages = [];
-        chat.messages.push(message);
-    });
+function openInfo() {
+    const chat = getChat(activeChatId);
+    if (!chat) return;
+
+    applyAvatar(infoAvatar, chat.uid || chat.name || chat.id);
+    infoName.textContent = chat.name || 'Guest';
+    infoTopic.textContent = chat.issue || '';
+
+    const last = lastMessageOf(chat);
+    infoFacts.innerHTML =
+        fact('Date', fmtDate(chat.createdAt)) +
+        fact('Time', fmtTime(chat.createdAt)) +
+        fact('UID', chat.uid || '-') +
+        fact('Mobile', chat.phone || '-') +
+        (chat.amount ? fact('Amount', chat.amount) : '') +
+        fact('Last Activity', last ? fmtTime(last.at) : '-') +
+        fact('Messages', String((chat.messages || []).length));
+
+    openLayer(infoPopup);
 }
+
+function fact(k, v) {
+    return '<div class="fact"><span class="fact-k">' + k + '</span><span class="fact-v">' + escapeHtml(v) + '</span></div>';
+}
+
+function sendText() {
+    const text = messageInput.value.trim();
+    if (!text || !activeChatId) return;
+
+    addMessage(activeChatId, { from: SIDE, text: text });
+    messageInput.value = '';
+    openChat(activeChatId);
+    messageInput.focus();
+}
+
+function openAttachMenu() {
+    attachMenu.hidden = !attachMenu.hidden;
+}
+
+async function sendFile(kind, file) {
+    if (!file || !activeChatId) return;
+
+    const msg = { from: SIDE, text: '' };
+
+    if (kind === 'image') {
+        try {
+            msg.image = await compressImage(file);
+        } catch (e) {
+            showToast('Could not read that image');
+            return;
+        }
+    } else {
+        msg.file = { name: file.name, size: file.size, type: file.type };
+    }
+
+    try {
+        addMessage(activeChatId, msg);
+    } catch (e) {
+        showToast('Browser storage is full, could not save');
+        return;
+    }
+
+    openChat(activeChatId);
+    showToast(kind === 'image' ? 'Image sent' : 'File sent');
+}
+
+function openMsgSheet(msgId) {
+    const chat = getChat(activeChatId);
+    if (!chat) return;
+    const msg = (chat.messages || []).find(function(m) { return m.id === msgId; });
+    if (!msg) return;
+
+    sheetMsgId = msgId;
+    msgSheetHead.textContent = msg.text ? msg.text.slice(0, 60) : (msg.image ? 'Image' : 'File');
+
+    const mine = msg.from === SIDE;
+    msgSheet.querySelector('[data-sheet="edit"]').hidden = !mine || !msg.text;
+    msgSheet.querySelector('[data-sheet="delete"]').hidden = false;
+
+    openLayer(msgSheet);
+}
+
+if (newChatBtn) newChatBtn.addEventListener('click', function() {
+    newChatText.value = '';
+    setError(newChatText, '');
+    openLayer(newChatPopup);
+    newChatText.focus();
+});
+
+if (emptyNewChat) emptyNewChat.addEventListener('click', function() { openLayer(newChatPopup); });
+
+if (newChatForm) newChatForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const text = newChatText.value.trim();
+    if (text.length < 2) {
+        setError(newChatText, 'Please type your message');
+        return;
+    }
+
+    const id = currentIdentity() || {};
+
+    const chat = {
+        id: newId(),
+        issue: newChatTopic.value,
+        name: 'Guest',
+        uid: id.uid || '',
+        phone: id.phone || '',
+        amount: '',
+        createdAt: new Date().toISOString(),
+        messages: []
+    };
+
+    addChat(chat);
+    addMessage(chat.id, { from: SIDE, text: text });
+
+    closeLayer(newChatPopup);
+    renderList();
+    openChat(chat.id);
+    showToast('Chat started');
+});
 
 gateForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
     const uid = gateUid.value.trim();
     const phone = gatePhone.value.trim();
-    let valid = true;
+    const uidOk = /^[A-Za-z0-9]{4,}$/.test(uid);
+    const phoneOk = /^[0-9]{10}$/.test(phone);
 
-    setError(gateUid, /^[A-Za-z0-9]{4,}$/.test(uid) ? '' : 'Please enter a valid UID');
-    setError(gatePhone, /^[0-9]{10}$/.test(phone) ? '' : 'Please enter a valid 10 digit mobile number');
+    setError(gateUid, uidOk ? '' : 'Please enter a valid UID');
+    setError(gatePhone, phoneOk ? '' : 'Please enter a valid 10 digit mobile number');
+    if (!uidOk || !phoneOk) return;
 
-    if (!/^[A-Za-z0-9]{4,}$/.test(uid)) valid = false;
-    if (!/^[0-9]{10}$/.test(phone)) valid = false;
-    if (!valid) return;
-
-    setIdentity(uid, phone);
-    renderIdentity();
-    closeModal(gatePopup);
+    saveIdentity(uid, phone);
+    closeLayer(gatePopup);
 });
 
 gateUid.addEventListener('input', function() {
@@ -272,163 +415,168 @@ gatePhone.addEventListener('input', function() {
     setError(this, '');
 });
 
-function renderIdentity() {
-    const id = getIdentity();
-    if (!id) return;
-    identityBar.hidden = false;
-    identityName.textContent = 'UID ' + id.uid;
-    identityMeta.textContent = id.phone;
-}
-
-changeIdentityBtn.addEventListener('click', function() {
-    const id = getIdentity() || { uid: '', phone: '' };
-    gateUid.value = id.uid;
-    gatePhone.value = id.phone;
-    openModal(gatePopup);
-});
-
-chatList.addEventListener('click', function(e) {
-    const card = e.target.closest('.chat-card');
-    if (card) openChat(card.dataset.id);
-});
-
+backBtn.addEventListener('click', closeChat);
+peerBtn.addEventListener('click', openInfo);
+chatMenuBtn.addEventListener('click', openInfo);
 searchField.addEventListener('input', renderList);
 
-document.getElementById('newChatBtn').addEventListener('click', function() {
-    const id = getIdentity() || {};
-    newChatText.value = '';
-    setError(newChatText, '');
-    newChatForm.dataset.uid = id.uid || '';
-    newChatForm.dataset.phone = id.phone || '';
-    openModal(newChatPopup);
-    newChatText.focus();
+chatList.addEventListener('click', function(e) {
+    const row = e.target.closest('.ms-chat-row');
+    if (row) openChat(row.dataset.id);
 });
 
-newChatForm.addEventListener('submit', function(e) {
-    e.preventDefault();
+attachBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    openAttachMenu();
+});
 
-    const text = newChatText.value.trim();
-    if (text.length < 2) {
-        setError(newChatText, 'Please type your message');
-        return;
+attachMenu.addEventListener('click', function(e) {
+    const item = e.target.closest('[data-attach]');
+    if (!item) return;
+    attachMenu.hidden = true;
+    if (item.dataset.attach === 'image') imageInput.click();
+    else fileInput.click();
+});
+
+document.addEventListener('click', function(e) {
+    if (!attachMenu.hidden && !e.target.closest('#attachMenu') && !e.target.closest('#attachBtn')) {
+        attachMenu.hidden = true;
     }
-
-    const id = getIdentity() || {};
-    const chat = {
-        id: newId(),
-        issue: newChatTopic.value,
-        name: 'Guest',
-        uid: id.uid || '',
-        phone: id.phone || '',
-        amount: '',
-        createdAt: new Date().toISOString(),
-        messages: [{ from: 'user', text: text, at: new Date().toISOString() }]
-    };
-
-    addChat(chat);
-    closeModal(newChatPopup);
-    renderList();
-    openChat(chat.id);
-    showToast('Chat started');
 });
 
-function sendMessage() {
-    const text = messageInput.value.trim();
-    if (!text || !activeChatId) return;
+imageInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) sendFile('image', this.files[0]);
+    this.value = '';
+});
 
-    appendMessage(activeChatId, {
-        from: 'user',
-        text: text,
-        at: new Date().toISOString()
-    });
+fileInput.addEventListener('change', function() {
+    if (this.files && this.files[0]) sendFile('file', this.files[0]);
+    this.value = '';
+});
 
-    messageInput.value = '';
-    renderList();
-    openChat(activeChatId);
-    messageInput.focus();
-}
-
-sendMessageBtn.addEventListener('click', sendMessage);
+sendBtn.addEventListener('click', sendText);
 
 messageInput.addEventListener('keydown', function(e) {
     if (e.key === 'Enter') {
         e.preventDefault();
-        sendMessage();
+        sendText();
     }
 });
 
-document.getElementById('sendImageBtn').addEventListener('click', function() { openCompose('image'); });
-document.getElementById('sendFileBtn').addEventListener('click', function() { openCompose('file'); });
+messagesBox.addEventListener('click', function(e) {
+    const img = e.target.closest('[data-img]');
+    if (img) {
+        openLightbox(img.src, 'chat-image.jpg');
+        return;
+    }
 
-composeForm.addEventListener('submit', async function(e) {
+    const msg = e.target.closest('.ms-msg');
+    if (msg) openMsgSheet(msg.dataset.msgId);
+});
+
+let longPressTimer = null;
+messagesBox.addEventListener('contextmenu', function(e) {
     e.preventDefault();
+    const msg = e.target.closest('.ms-msg');
+    if (msg) openMsgSheet(msg.dataset.msgId);
+});
 
-    const chatId = composeChat.value;
-    const file = composeFile.files && composeFile.files[0];
-    const note = composeNote.value.trim();
+if (msgSheet) msgSheet.addEventListener('click', function(e) {
+    const item = e.target.closest('[data-sheet]');
+    if (!item) return;
 
-    if (!chatId) {
-        setError(composeChat, 'Please select a chat');
-        return;
-    }
-    if (!file) {
-        setError(composeFile, composeMode === 'image' ? 'Please choose an image' : 'Please choose a file');
-        return;
-    }
-    setError(composeFile, '');
-
-    const message = { from: 'user', text: note, at: new Date().toISOString() };
-
-    if (composeMode === 'image') {
-        try {
-            message.image = await compressImage(file);
-        } catch (err) {
-            setError(composeFile, 'Could not read that image');
-            return;
-        }
-    } else {
-        message.file = { name: file.name, size: file.size, type: file.type };
-    }
-
-    try {
-        appendMessage(chatId, message);
-    } catch (err) {
-        showToast('Browser storage is full, could not save');
+    const action = item.dataset.sheet;
+    if (action === 'cancel') {
+        closeLayer(msgSheet);
         return;
     }
 
-    closeModal(composePopup);
-    renderList();
-    if (activeChatId === chatId && !chatModal.hidden) openChat(chatId);
-    showToast(composeMode === 'image' ? 'Image sent' : 'File sent');
+    if (action === 'reply') {
+        closeLayer(msgSheet);
+        messageInput.focus();
+        return;
+    }
+
+    if (action === 'edit') {
+        const chat = getChat(activeChatId);
+        const msg = (chat.messages || []).find(function(m) { return m.id === sheetMsgId; });
+        closeLayer(msgSheet);
+        if (!msg || !editMsgPopup) return;
+        editMsgText.value = msg.text || '';
+        openLayer(editMsgPopup);
+        editMsgText.focus();
+        return;
+    }
+
+    if (action === 'delete') {
+        closeLayer(msgSheet);
+        confirmTitle.textContent = 'Delete this message?';
+        confirmText.textContent = 'The message will be removed from this chat.';
+        confirmAction = function() {
+            deleteMessage(activeChatId, sheetMsgId);
+            openChat(activeChatId);
+            showToast('Message deleted');
+        };
+        openLayer(confirmPopup);
+    }
+});
+
+if (editMsgForm) editMsgForm.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const text = editMsgText.value.trim();
+    if (!text) {
+        setError(editMsgText, 'Message cannot be empty');
+        return;
+    }
+    updateMessage(activeChatId, sheetMsgId, { text: text, edited: true });
+    closeLayer(editMsgPopup);
+    openChat(activeChatId);
+    showToast('Message updated');
+});
+
+infoEditBtn.addEventListener('click', function() {
+    const chat = getChat(activeChatId);
+    if (!chat) return;
+
+    editName.value = chat.name || '';
+    editUid.value = chat.uid || '';
+    editPhone.value = chat.phone || '';
+    editAmount.value = chat.amount || '';
+    editIssue.value = chat.issue || 'General Query';
+    editAmountField.hidden = !chat.amount;
+
+    closeLayer(infoPopup);
+    openLayer(editPopup);
+});
+
+infoDeleteBtn.addEventListener('click', function() {
+    closeLayer(infoPopup);
+    confirmTitle.textContent = 'Delete this chat?';
+    confirmText.textContent = 'The chat and all its messages will be removed from this browser. This cannot be undone.';
+    confirmAction = function() {
+        deleteChat(activeChatId);
+        closeChat();
+        showToast('Chat deleted');
+    };
+    openLayer(confirmPopup);
 });
 
 editForm.addEventListener('submit', function(e) {
     e.preventDefault();
 
-    const id = editId.value;
     const name = editName.value.trim();
     const uid = editUid.value.trim();
     const phone = editPhone.value.trim();
 
-    if (name.length < 2) {
-        setError(editName, 'Please enter a name');
-        return;
-    }
-    if (!/^[A-Za-z0-9]{4,}$/.test(uid)) {
-        setError(editUid, 'Please enter a valid UID');
-        return;
-    }
-    if (!/^[0-9]{10}$/.test(phone)) {
-        setError(editPhone, 'Please enter a valid 10 digit mobile number');
-        return;
-    }
+    if (name.length < 2) { setError(editName, 'Please enter a name'); return; }
+    if (!/^[A-Za-z0-9]{4,}$/.test(uid)) { setError(editUid, 'Please enter a valid UID'); return; }
+    if (!/^[0-9]{10}$/.test(phone)) { setError(editPhone, 'Please enter a valid 10 digit mobile number'); return; }
 
     setError(editName, '');
     setError(editUid, '');
     setError(editPhone, '');
 
-    updateChat(id, function(chat) {
+    updateChat(activeChatId, function(chat) {
         chat.name = name;
         chat.uid = uid;
         chat.phone = phone;
@@ -436,18 +584,15 @@ editForm.addEventListener('submit', function(e) {
         chat.issue = editIssue.value;
     });
 
-    closeModal(editPopup);
-    renderList();
-    if (activeChatId === id) openChat(id);
+    closeLayer(editPopup);
+    openChat(activeChatId);
     showToast('Chat updated');
 });
 
+editName.addEventListener('input', function() { setError(this, ''); });
+
 editUid.addEventListener('input', function() {
     this.value = this.value.replace(/[^A-Za-z0-9]/g, '').slice(0, 20);
-    setError(this, '');
-});
-
-editName.addEventListener('input', function() {
     setError(this, '');
 });
 
@@ -463,79 +608,52 @@ editAmount.addEventListener('input', function() {
     this.value = v;
 });
 
-chatModal.addEventListener('click', function(e) {
-    const actionBtn = e.target.closest('[data-action]');
-    if (actionBtn) {
-        const action = actionBtn.dataset.action;
-        if (action === 'edit') openEdit(activeChatId);
-        if (action === 'delete') {
-            pendingDeleteId = activeChatId;
-            openModal(confirmPopup);
-        }
-        if (action === 'reply') {
-            messageInput.focus();
-            messageInput.scrollIntoView({ block: 'nearest' });
-            return;
-        }
-        return;
-    }
+if (editMsgText) editMsgText.addEventListener('input', function() { setError(this, ''); });
 
-    const img = e.target.closest('.msg-image');
-    if (img) {
-        const chat = getChat(activeChatId);
-        const msg = chat && chat.messages[Number(img.dataset.msg)];
-        openLightbox(img.src, (chat && chat.name ? chat.name : 'chat') + '-image.jpg');
-        return;
-    }
-
-    const thumb = e.target.closest('.chat-thumb img');
-    if (thumb) {
-        const card = thumb.closest('.chat-card');
-        const chat = getChat(card.dataset.id);
-        const last = chat && lastMessageOf(chat);
-        if (last && last.image) openLightbox(last.image, (chat.name || 'chat') + '-image.jpg');
-    }
-});
-
-confirmDelete.addEventListener('click', function() {
-    if (pendingDeleteId) deleteChat(pendingDeleteId);
-    pendingDeleteId = null;
-    activeChatId = null;
-    closeModal(confirmPopup);
-    closeModal(chatModal);
-    renderList();
-    showToast('Chat deleted');
+confirmOk.addEventListener('click', function() {
+    const fn = confirmAction;
+    confirmAction = null;
+    closeLayer(confirmPopup);
+    if (fn) fn();
 });
 
 lightboxClose.addEventListener('click', function() {
     lightboxImg.removeAttribute('src');
-    closeModal(lightbox);
+    closeLayer(lightbox);
 });
+
+function openLightbox(src, name) {
+    lightboxImg.src = src;
+    lightboxName.textContent = name || 'Image';
+    lightboxDownload.href = src;
+    lightboxDownload.setAttribute('download', name || 'image.jpg');
+    openLayer(lightbox);
+}
 
 document.addEventListener('click', function(e) {
     const closer = e.target.closest('[data-close]');
-    if (closer) closeModal(document.getElementById(closer.dataset.close));
+    if (closer) closeLayer(document.getElementById(closer.dataset.close));
 });
 
 document.addEventListener('keydown', function(e) {
     if (e.key !== 'Escape') return;
+
     if (!lightbox.hidden) {
         lightboxImg.removeAttribute('src');
-        closeModal(lightbox);
+        closeLayer(lightbox);
         return;
     }
-    document.querySelectorAll('.modal-overlay:not([hidden])').forEach(function(m) {
-        if (m !== gatePopup) closeModal(m);
-    });
+    if (!msgSheet.hidden) { closeLayer(msgSheet); return; }
+    if (!attachMenu.hidden) { attachMenu.hidden = true; return; }
+    if (!infoPopup.hidden) { closeLayer(infoPopup); return; }
+    if (!editPopup.hidden) { closeLayer(editPopup); return; }
+    if (!editMsgPopup.hidden) { closeLayer(editMsgPopup); return; }
+    if (!confirmPopup.hidden) { closeLayer(confirmPopup); return; }
+    if (!newChatPopup.hidden) { closeLayer(newChatPopup); return; }
+    if (!chatPane.hidden && window.innerWidth < 768) closeChat();
 });
 
 renderList();
-renderIdentity();
 
-if (!getIdentity()) {
-    gateUid.value = '';
-    gatePhone.value = '';
-    openModal(gatePopup);
-} else {
-    closeModal(gatePopup);
-}
+if (currentIdentity()) closeLayer(gatePopup);
+else openLayer(gatePopup);

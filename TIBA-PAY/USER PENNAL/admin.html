@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-    <title>Online Chat - TIVRA Pay</title>
+    <title>Admin Panel - TIVRA Pay Chat</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body data-page="chat" class="ms-app">
+<body data-page="admin" class="ms-app is-admin">
 
 <div class="messenger" id="messenger">
 
     <!-- ===== CHAT LIST PANE ===== -->
     <section class="ms-pane ms-list-pane" id="listPane">
-        <header class="ms-bar">
+        <header class="ms-bar ms-bar-admin">
             <div class="ms-bar-title">
-                <img src="LOGO/logo.png" alt="TIVRA Pay" class="ms-logo">
-                <span>TIVRA Pay Chat</span>
+                <span class="ms-admin-dot"></span>
+                <span>Admin Panel</span>
             </div>
             <a href="index.html" class="ms-icon-btn" aria-label="Home">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -26,7 +26,7 @@
         </header>
 
         <div class="ms-search">
-            <input type="search" id="chatSearch" placeholder="Search by name, UID, mobile or topic">
+            <input type="search" id="chatSearch" placeholder="Search by UID, mobile, name or topic">
         </div>
 
         <div class="ms-list" id="chatList"></div>
@@ -36,16 +36,8 @@
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
             </svg>
             <p class="ms-empty-title">No chats yet</p>
-            <p class="ms-empty-sub">Tap New Chat to start, or submit a complaint from the Deposit, Withdrawal or Account page.</p>
-            <button type="button" class="ms-primary-btn" id="emptyNewChat">Start a chat</button>
+            <p class="ms-empty-sub">Chats created by users on the Online Chat page will appear here.</p>
         </div>
-
-        <button type="button" class="ms-fab" id="newChatBtn" aria-label="New chat">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                <line x1="12" y1="5" x2="12" y2="19"/>
-                <line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-        </button>
     </section>
 
     <!-- ===== CONVERSATION PANE ===== -->
@@ -60,7 +52,7 @@
             <button type="button" class="ms-peer" id="peerBtn">
                 <span class="ms-avatar" id="peerAvatar">?</span>
                 <span class="ms-peer-text">
-                    <span class="ms-peer-name" id="peerName">Chat</span>
+                    <span class="ms-peer-name" id="peerName">User</span>
                     <span class="ms-peer-status" id="peerStatus"></span>
                 </span>
             </button>
@@ -106,7 +98,7 @@
                     <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
                 </svg>
             </button>
-            <input type="text" id="messageInput" placeholder="Type a message" autocomplete="off">
+            <input type="text" id="messageInput" placeholder="Type a reply" autocomplete="off">
             <button type="button" class="ms-send-btn" id="sendBtn" aria-label="Send">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <line x1="22" y1="2" x2="11" y2="13"/>
@@ -121,15 +113,15 @@
 
 </div>
 
-<!-- ===== IDENTITY GATE ===== -->
+<!-- ===== ADMIN LOGIN ===== -->
 <div class="modal-overlay" id="gatePopup">
     <div class="modal-box gate-box">
-        <h2>Enter Your Details</h2>
-        <p class="modal-sub">Please enter your UID and mobile number to start the chat.</p>
+        <h2>Admin Login</h2>
+        <p class="modal-sub">Enter your admin UID and mobile number to open the panel.</p>
         <form id="gateForm" novalidate>
             <div class="field">
-                <label for="gateUid">UID</label>
-                <input type="text" id="gateUid" placeholder="Enter your UID" autocomplete="off" spellcheck="false">
+                <label for="gateUid">Admin UID</label>
+                <input type="text" id="gateUid" placeholder="Enter admin UID" autocomplete="off" spellcheck="false">
                 <small class="err"></small>
             </div>
             <div class="field">
@@ -137,39 +129,7 @@
                 <input type="tel" id="gatePhone" placeholder="Enter 10 digit mobile number" maxlength="10" inputmode="numeric" autocomplete="tel">
                 <small class="err"></small>
             </div>
-            <button type="submit" class="submit-btn">Start Chat</button>
-        </form>
-    </div>
-</div>
-
-<!-- ===== NEW CHAT ===== -->
-<div class="modal-overlay" id="newChatPopup" hidden>
-    <div class="modal-box">
-        <div class="ms-modal-head">
-            <h2>New Chat</h2>
-            <button type="button" class="icon-close" data-close="newChatPopup" aria-label="Close">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </button>
-        </div>
-        <form id="newChatForm" novalidate>
-            <div class="field">
-                <label for="newChatTopic">Topic</label>
-                <select id="newChatTopic">
-                    <option>Deposit Problem</option>
-                    <option>Withdrawal Problem</option>
-                    <option>Account Verification Problem</option>
-                    <option>General Query</option>
-                </select>
-            </div>
-            <div class="field">
-                <label for="newChatText">Message</label>
-                <textarea id="newChatText" rows="3" placeholder="Describe your issue"></textarea>
-                <small class="err"></small>
-            </div>
-            <button type="submit" class="submit-btn">Start Chat</button>
+            <button type="submit" class="submit-btn">Open Panel</button>
         </form>
     </div>
 </div>
@@ -188,7 +148,7 @@
         </div>
         <div class="ms-info-hero">
             <span class="ms-avatar lg" id="infoAvatar">?</span>
-            <div class="ms-info-name" id="infoName">Chat</div>
+            <div class="ms-info-name" id="infoName">User</div>
             <div class="ms-info-topic" id="infoTopic"></div>
         </div>
         <div class="detail-facts" id="infoFacts"></div>
@@ -351,7 +311,6 @@
     </div>
 </div>
 
-<!-- ===== TOAST ===== -->
 <div class="toast" id="toast" hidden></div>
 
 <script src="script.js"></script>
