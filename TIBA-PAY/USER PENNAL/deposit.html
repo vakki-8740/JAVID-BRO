@@ -34,56 +34,70 @@
         <form class="support-form" id="supportForm" data-issue="Deposit Problem" novalidate>
 
             <div class="field">
-                <label for="fullName">Full Name</label>
+                <label for="fullName">User Name</label>
                 <input type="text" id="fullName" placeholder="Enter your name" autocomplete="name">
-                <small class="err" data-for="fullName"></small>
+                <small class="err"></small>
             </div>
 
             <div class="field">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" placeholder="Enter your email" autocomplete="email">
-                <small class="err" data-for="email"></small>
+                <label for="uid">Enter UID</label>
+                <input type="text" id="uid" placeholder="Enter your UID" autocomplete="off" spellcheck="false">
+                <small class="err"></small>
             </div>
 
             <div class="field">
-                <label for="phone">Phone Number</label>
-                <input type="tel" id="phone" placeholder="Enter phone number" maxlength="15" autocomplete="tel">
-                <small class="err" data-for="phone"></small>
+                <label for="phone">Mobile Number</label>
+                <input type="tel" id="phone" placeholder="Enter 10 digit mobile number" maxlength="10" inputmode="numeric" autocomplete="tel">
+                <small class="err"></small>
             </div>
 
             <div class="field">
-                <label for="txnId">Transaction / UTR ID</label>
-                <input type="text" id="txnId" placeholder="e.g. 412233445566">
-                <small class="err" data-for="txnId"></small>
-            </div>
-
-            <div class="field">
-                <label for="amount">Amount</label>
+                <label for="amount">Deposit Amount</label>
                 <input type="text" id="amount" placeholder="e.g. 5000" inputmode="decimal">
-                <small class="err" data-for="amount"></small>
+                <small class="err"></small>
             </div>
 
             <div class="field">
-                <label for="method">Payment Method</label>
-                <select id="method">
-                    <option value="">Select a method</option>
-                    <option>UPI</option>
-                    <option>Bank Transfer</option>
-                    <option>Debit Card</option>
-                    <option>Net Banking</option>
-                </select>
+                <label for="proofImage">Upload Payment Image</label>
+                <div class="upload-box" id="uploadBox">
+                    <input type="file" id="proofImage" accept="image/*" hidden>
+                    <div class="upload-empty" id="uploadEmpty">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                            <polyline points="17 8 12 3 7 8"/>
+                            <line x1="12" y1="3" x2="12" y2="15"/>
+                        </svg>
+                        <span class="upload-text">Tap to upload payment image</span>
+                        <span class="upload-hint">PNG or JPG, max 5 MB</span>
+                    </div>
+                    <div class="upload-preview" id="uploadPreview" hidden>
+                        <img id="previewImg" alt="Uploaded proof preview">
+                        <button type="button" class="upload-remove" id="removeImage" aria-label="Remove image">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <small class="err"></small>
             </div>
 
-            <div class="field">
-                <label for="message">What happened?</label>
-                <textarea id="message" rows="4" placeholder="e.g. I deposited 5000 via UPI 2 hours ago, amount is still not credited."></textarea>
-                <small class="err" data-for="message"></small>
-            </div>
-
-            <button type="submit" class="submit-btn">Submit Request</button>
+            <button type="submit" class="submit-btn" id="submitBtn">Submit Complaint</button>
         </form>
 
     </main>
+
+    <!-- ===== LOADING OVERLAY ===== -->
+    <div class="loading-overlay" id="loadingOverlay" hidden>
+        <div class="loading-box">
+            <div class="spinner" aria-hidden="true"><span></span><span></span><span></span></div>
+            <h2>Submitting your complaint</h2>
+            <p id="loadingNote">Please wait, do not close this page.</p>
+            <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+            <span class="countdown" id="countdown">5s</span>
+        </div>
+    </div>
 
     <!-- ===== SUCCESS POPUP ===== -->
     <div class="success-popup" id="successPopup" hidden>
@@ -93,8 +107,8 @@
                     <polyline points="5 12 9 16 19 6"/>
                 </svg>
             </div>
-            <h2>Request Received</h2>
-            <p id="successNote">Our support team will contact you shortly.</p>
+            <h2>Complaint Submitted</h2>
+            <p id="successNote">Your complaint is submitted. Please wait 30 minutes, then your problem will be fixed.</p>
             <button class="done-btn" id="doneBtn">Close</button>
         </div>
     </div>
